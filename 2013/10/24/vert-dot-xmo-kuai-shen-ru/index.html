@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Vert.x模块深入 | Writing for Thingking</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="最近小忙了一点,一直拖着没有总结Vert.x模块其他内容,今天在下班前应该可以写完模块这一部分的总结。
+模块包含有时候你会发现几个模块之间用了共同的Jar文件,或者资源文件.比如我们常用的Apache Commons Lang等.这个时候多个模块,会在JVM里加载多份,导致很多重复的引用,而且会有可能导致JVM里的方法区爆满.这个时候推荐将这些资源文件打包到一个模块里.这种模块称为资源模块.然后在">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Vert.x模块深入">
+<meta property="og:url" content="http://www.streamis.me/2013/10/24/vert-dot-xmo-kuai-shen-ru/index.html">
+<meta property="og:site_name" content="Writing for Thingking">
+<meta property="og:description" content="最近小忙了一点,一直拖着没有总结Vert.x模块其他内容,今天在下班前应该可以写完模块这一部分的总结。
+模块包含有时候你会发现几个模块之间用了共同的Jar文件,或者资源文件.比如我们常用的Apache Commons Lang等.这个时候多个模块,会在JVM里加载多份,导致很多重复的引用,而且会有可能导致JVM里的方法区爆满.这个时候推荐将这些资源文件打包到一个模块里.这种模块称为资源模块.然后在">
+<meta property="og:updated_time" content="2014-06-17T00:33:00.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Vert.x模块深入">
+<meta name="twitter:description" content="最近小忙了一点,一直拖着没有总结Vert.x模块其他内容,今天在下班前应该可以写完模块这一部分的总结。
+模块包含有时候你会发现几个模块之间用了共同的Jar文件,或者资源文件.比如我们常用的Apache Commons Lang等.这个时候多个模块,会在JVM里加载多份,导致很多重复的引用,而且会有可能导致JVM里的方法区爆满.这个时候推荐将这些资源文件打包到一个模块里.这种模块称为资源模块.然后在">
+  
+    <link rel="alternative" href="/atom.xml" title="Writing for Thingking" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+  
+
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Writing for Thingking</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://www.streamis.me"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-vert-dot-xmo-kuai-shen-ru" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2013/10/24/vert-dot-xmo-kuai-shen-ru/" class="article-date">
+  <time datetime="2013-10-24T09:18:00.000Z" itemprop="datePublished">2013-10-24</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Vert-x/">Vert.x</a>►<a class="article-category-link" href="/categories/Vert-x/Asynchronize-programming/">Asynchronize programming</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Vert.x模块深入
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>最近小忙了一点,一直拖着没有总结Vert.x模块其他内容,今天在下班前应该可以写完模块这一部分的总结。</p>
+<h2 id="模块包含">模块包含</h2><p>有时候你会发现几个模块之间用了共同的Jar文件,或者资源文件.比如我们常用的Apache Commons Lang等.这个时候多个模块,会在JVM里加载多份,导致很多重复的引用,而且会有可能导致JVM里的方法区爆满.这个时候推荐将这些资源文件打包到一个模块里.这种模块称为资源模块.然后在其他模块里使用<code>include</code>去包含他.我们举个栗子.<br>我们有一个<code>commons-lang3.jar</code>,这个jar包希望用在两个模块下面,比如<code>com.xx.module1-v1.0</code>和<code>com.xx.module2-v1.0</code>.为了包含这个<code>commons-lang3.jar</code>我们需要创建一个模块.比如<code>com.xx.share-v1.0</code>,在这个模块的目录下建立一个<code>lib</code>文件夹,然后把<code>commons-lang3.jar</code>放到这个目录里.看起来应该是</p>
+<pre><code><span class="string">|--com.xx.share-v1.0</span>
+<span class="string">|----lib</span>
+<span class="string">|------commons-lang3.jar</span>
+</code></pre><p>最后我们在<code>com.xx.module1-v1.0 与 module2-v1.0</code>里面包含这个模块就行啦.<br><code>&quot;includes&quot;:&quot;com.xx.share-v1.0&quot;</code>,具体关于<code>mod.json</code>可以看我上一篇文章.如果你要包含多个模块,记得用逗号隔开.这里还有一点需要注意的是,被包含的模块必须是<code>非运行模块</code>.啥叫非运行模块呢.很简单就是<code>mod.json</code>里没有<code>main</code>这个声明.典型的就是语言模块.<br>模块目录结构具体的部分可以查看官网目录资料<a href="http://vertx.io/mods_manual.html#examples" target="_blank" rel="external">典型模块目录结构</a></p>
+<h2 id="模块类路径与模块类加载器">模块类路径与模块类加载器</h2><p>这一块是Vert.x的比较复杂的部分,与很多修改类加载方式的框架差不多.Vert.x有自己的一套类加载管理方式.官网给的资料不一定是正确的,因为master线对类加载做了一些修改.</p>
+<h3 id="模块类路径">模块类路径</h3><p>每一个模块都有自己的类加载器。这个类加载器负责加载此模块跟目录下的所有文件,包括<code>jar</code>,<code>zip</code>,<code>xml</code>,<code>properties</code>等各种格式。根路径就是模块目录.注意一点。这些被加载的文件只包含在模块的类加载器里。其他模块不能访问。</p>
+<h3 id="模块类加载器">模块类加载器</h3><p>模块有自己的类路径,加载类路径下的资源的时候依赖自己类加载器.因为vert.x启动的时候会给每一个模块一个类加载器,注意这里不管你部署多个模块相同的实例,都只有对应的一个模块类加载器。<br><code>vertx runmod com.xx.module-v1.0 -instances 100</code>即是你这里声明100个实例,还是只有一个类加载器.这样也就意味着模块之间的类加载是互相隔离的.<br>同时你也不能使用静态变量在模块之间传输数据.但是这些静态变量还是可以在模块实例之间传输的.<br>另外你也可以对同一个模块设定版本号同时跑在多个Vert.x实例上.具体的场景就是模块动态替换.比如v1.0版本发现有一个Bug,这个时候你部署一个V2.0的版本.然后慢慢的等v1.0的模块不再被访问的时候,可以执行模块卸载命令卸载掉.</p>
+<p>模块的加载器们是按层级分布的,一个模块加载器会含有0个或多个父类加载器.当一个模块加载资源或者文件的时候,模块加载器首先通过自己的类加载器来加载资源,如果加载不到,则会委托其父加载器去加载资源.这点恰好与标准的Java类加载机制相反.</p>
+<p>如果所有父类模块都加载不到资源的话,那么Vert.x的Platform 类加载器会去搜索,Platform是Vert.x的启动者,他会在Vert.x的Home目录里去搜索.</p>
+<p>一般而言直接通过命令行启动一个verticle,不会有其父模块类加载器.除非一个verticle被其一另一个模块部署,那么部署他的模块就是其父模块.这一点其实也非常好理解.被包者的都是子集.同时父加载器可以加载子集的资源.</p>
+<h2 id="启动模块">启动模块</h2><h3 id="从命令行">从命令行</h3><p><code>vertx runmod org.myorg~mymod~3.2</code></p>
+<p>直接跑zip包也可以<br><code>vertx runzip my-mod-3.2.zip</code></p>
+<h3 id="从程序里启动">从程序里启动</h3><p>这里还是以JS作为例子</p>
+<p><code>vertx.deployModule(&#39;org.myorg~mymod~3.2&#39;);</code></p>
+<h2 id="如何定位模块">如何定位模块</h2><p>当尝试包含一个模块的时候,Vert.x会做以下几件事情.</p>
+<ul>
+<li>尝试查找<code>mods</code>目录.</li>
+<li><code>VERTX_MODS</code>环境变量所指定的目录.</li>
+<li><code>sys-mods</code>目录.</li>
+</ul>
+<p>如果以上都不存在,Vert.x 会尝试读取<code>conf</code>下的<code>repos.txt</code>文件.里面包含了一些路径.</p>
+<pre><code><span class="preprocessor">#本地Maven仓库</span>
+mavenLocal:~/.m2/repository
+
+<span class="preprocessor">#Maven 公网</span>
+maven:http:<span class="comment">//repo2.maven.org/maven2</span>
+
+<span class="preprocessor"># Sonatype 仓库</span>
+maven:http:<span class="comment">//oss.sonatype.org/content/repositories/snapshots</span>
+
+<span class="preprocessor"># 一个二进制网站.你可以在这里发布二进制文件</span>
+bintray:http:<span class="comment">//dl.bintray.com</span>
+</code></pre><p>当然你也可以添加自己公司的私服地址,这样就可以在局域网内分享了.</p>
+<p>Vert.x模块有自己的文件格式定义,这与NodeJS的package.json一样.</p>
+<pre><code><span class="attribute">GroupID</span>: <span class="string">com.mycompany</span>
+<span class="attribute">ArtifactID</span>: <span class="string">my-mod</span>
+<span class="attribute">Version</span>: <span class="string">1.2-beta</span>
+</code></pre><p>上面的定义与Maven很像,它会生成一个Vert.x模块文件名:<code>com.mycompany~my-mod~1.2-beta</code>.这就是Vert.x模块唯一字符串.如果你想从公网上直接下载zip模块.你可以尝试使用<code>dl.bintray.com</code>.</p>
+<h2 id="其他命令">其他命令</h2><p>另外还两个不怎么常用的vert.x模块命令</p>
+<ul>
+<li>vertx pulldeps <module_name> 拉下该模块所有的相关依赖</module_name></li>
+<li>vertx install <module_name> 在Vert.x容器启动前,先下载并安装该模块到<code>mods</code>目录</module_name></li>
+<li>vertx uninstall <module_name> 与上面的命令相反</module_name></li>
+</ul>
+<p>关于Vert.x模块方面的东西,暂时先讲这么多.后期我会介绍几个Vert.x社区里特别流行的模块.</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.streamis.me/2013/10/24/vert-dot-xmo-kuai-shen-ru/" data-id="cidzpu8bu000l614524nyp6gu" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2013/11/11/rang-stormfei-qi-lai/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          让Storm飞起来
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2013/10/03/vert-dot-xmo-kuai-de-gai-nian/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Vert.x模块的基本概念</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Emacs/">Emacs</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Storm/">Storm</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Vert-x/">Vert.x</a><span class="category-list-count">8</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Vert-x/Asynchronize-programming/">Asynchronize programming</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Vert-x/micro-service/">micro-service</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/vert-x源码分析/">vert.x源码分析</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">May 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/10/">October 2014</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/05/">May 2014</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/11/">November 2013</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/10/">October 2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/09/">September 2013</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recents</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2015/05/26/vertx-rpckuang-jia/">Vertx-rpc框架</a>
+          </li>
+        
+          <li>
+            <a href="/2014/10/06/vert-dot-x3-update/">Vert.x3 Update</a>
+          </li>
+        
+          <li>
+            <a href="/2014/05/06/vert-dot-xyu-lao-xiang-mu-jie-he/">Vert.x与老项目结合</a>
+          </li>
+        
+          <li>
+            <a href="/2014/05/04/vert-dot-xli-yi-bu-chu-li-di-san-fang-fu-wu/">Vert.x里异步处理第三方服务</a>
+          </li>
+        
+          <li>
+            <a href="/2014/05/02/os-x-xia-she-zhi-emacs-shellde-ls-color/">OS X 下设置Emacs Shell-mode 输出颜色</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 Stream Liu<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css">
+  <script src="/fancybox/jquery.fancybox.pack.js" type="text/javascript"></script>
+
+
+<script src="/js/script.js" type="text/javascript"></script>
+
+  </div>
+</body>
+</html>

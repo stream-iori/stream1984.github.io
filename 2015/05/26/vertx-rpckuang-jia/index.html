@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Vertx-rpc框架 | Writing for Thingking</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="Vert.x的微服务最近关于微服务的概念到处都在宣传,而Vert.x的verticle本身就是很好的一种服务定义,你可以把verticle看成一个service,小一点,你可以把verticle看成一个actor.这样你的视角会切到Actor模型里.这里我们讨论如何用vert.x实现基于接口的服务化.
+传统Java开发人员受EJB以及Spring的影响比较深,所以对面向接口编程了解的比较多.哪怕跨">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Vertx-rpc框架">
+<meta property="og:url" content="http://www.streamis.me/2015/05/26/vertx-rpckuang-jia/index.html">
+<meta property="og:site_name" content="Writing for Thingking">
+<meta property="og:description" content="Vert.x的微服务最近关于微服务的概念到处都在宣传,而Vert.x的verticle本身就是很好的一种服务定义,你可以把verticle看成一个service,小一点,你可以把verticle看成一个actor.这样你的视角会切到Actor模型里.这里我们讨论如何用vert.x实现基于接口的服务化.
+传统Java开发人员受EJB以及Spring的影响比较深,所以对面向接口编程了解的比较多.哪怕跨">
+<meta property="og:updated_time" content="2015-08-19T06:41:35.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Vertx-rpc框架">
+<meta name="twitter:description" content="Vert.x的微服务最近关于微服务的概念到处都在宣传,而Vert.x的verticle本身就是很好的一种服务定义,你可以把verticle看成一个service,小一点,你可以把verticle看成一个actor.这样你的视角会切到Actor模型里.这里我们讨论如何用vert.x实现基于接口的服务化.
+传统Java开发人员受EJB以及Spring的影响比较深,所以对面向接口编程了解的比较多.哪怕跨">
+  
+    <link rel="alternative" href="/atom.xml" title="Writing for Thingking" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+  
+
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Writing for Thingking</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://www.streamis.me"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-vertx-rpckuang-jia" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/05/26/vertx-rpckuang-jia/" class="article-date">
+  <time datetime="2015-05-26T13:43:57.000Z" itemprop="datePublished">2015-05-26</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Vert-x/">Vert.x</a>►<a class="article-category-link" href="/categories/Vert-x/micro-service/">micro-service</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Vertx-rpc框架
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="Vert-x的微服务">Vert.x的微服务</h3><p>最近关于微服务的概念到处都在宣传,而Vert.x的verticle本身就是很好的一种服务定义,你可以把verticle看成一个service,小一点,你可以把verticle看成一个actor.<br>这样你的视角会切到Actor模型里.这里我们讨论如何用vert.x实现基于接口的服务化.</p>
+<p>传统Java开发人员受EJB以及Spring的影响比较深,所以对面向接口编程了解的比较多.哪怕跨JVM也可以通过接口来调用对方提供的方法.这是非常友好方便的开发方式,因为框架层面做了服务发现<br>以及服务生命周期的管理.</p>
+<p>Vert.x本质上可以通过verticle来定义服务边界,通过EventBus来包装并提供服务,消费端可以根据EventBus的Address来调用暴露出来的服务.而服务的发现以及隐藏则由Vert.x包装掉,乍一看<br>一切都显得很自然,仿佛Vert.x就是为微服务而生的.</p>
+<p>但是Vert.x的EventBus有两点不太好的地方,导致不能原生支持面向接口的服务调用.</p>
+<h3 id="EventBus的两宗罪">EventBus的两宗罪</h3><p>EventBus是Vert.x的核心,因为它的存在可以使得系统模块化解耦成为可能,同时也可以将业务水平扩展.我们只需要定义EventBus地址然后传入Json对象就可以,所有的事情都很流畅.<br>但是这里有一点不太好的地方,默认传输协议走Json.而Json本身不太好定义数据类型.</p>
+<p>如果了解Vert.x历史的同学肯定知道为什么EventBus一定要使用Json作为主要的传输对象——为了兼容其他JVM上的弱语言.<br>可是现实情况中80%的项目都是基于Java跑的,根本就没有考虑去兼容其他JVM上的语言.这就造成了一种尴尬,大家都传Json对象,然后在Handler里先做一次转换,将Json对象转换成POJO,之后再做业务上的逻辑.<br>这里明显在<code>Handler</code>里做了很多与业务无关的事情,服务定位与对象转换,这些本质上应该是框架层面去解决的.</p>
+<p>不能隐试的将Json对象转成POJO这是EventBus的<code>一宗罪</code>.(<code>Vert.x3可以直接接受POJO,但是针对一个address,只能接收一种POJO格式.</code>)<br>另外当我们使用EventBus的时候不能很方便的确定方法逻辑,简单的讲我只能<code>EventBus.send()</code>,后面跟地址参数,以及JSON对象,而这并不适合描述业务,这是EventBus的<code>二宗罪</code>.</p>
+<p>举个例子,有一个业务逻辑,对用户的账户进行存款与取款这两个操作,如果用Java接口来描述就很Easy.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Account</span> </span>&#123;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">saveMemory</span><span class="params">(<span class="keyword">int</span> total)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">withdrawMemory</span><span class="params">(<span class="keyword">int</span> total)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果换成<code>EventBus</code>你会发现没办法定义行为的名称(<code>java的方法</code>),只能通过<code>eb.send(&quot;address&quot;, json)</code>来调用目标接口.<br>这里的json也许得包含<code>method</code>的描述.这样会显得很啰嗦,关键是对IDE不友好,重构起来不方便,严重影响团队开发流畅度.</p>
+<p>看到这里大家也许已经有点明白了,如果能够做到RPC调用,那会非常方便我们开发.</p>
+<h3 id="Vertx-RPC介绍">Vertx-RPC介绍</h3><p>介于上面的原因,我们开发了一个简单的RPC框架,它简单的封装了EventBus,使之可以包装成Java的接口.这样客户端与服务端之间调用就像本地接口一样.<br><a href="https://github.com/LeapAppServices/vertx-rpc" target="_blank" rel="external">vertx-rpc</a>其实做的非常简单,他只依赖protostuff,作为数据传输的协议,当然也可以使用JSON协议.<br>接着只需要定义好接口,然后在服务端实现接口,而客户端只依赖接口,单独将项目打包成jar暴露给出来就可以使用了.</p>
+<p>我们继续上面的例子,根据接口我们会把项目分成两个Maven模块.<code>SPI</code>,<code>SPI-impl</code>,在parent的<code>pom.xml</code>定义好即可.<br>下面我们先在<code>impl</code>的项目里启动好<code>service</code>并通过<code>EventBus</code>暴露服务.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">Vertx vertx = Vertx.vertx();</span><br><span class="line">String address = <span class="string">"serviceAddress"</span>;</span><br><span class="line"></span><br><span class="line">RPCServerOptions rpcServerOptions = <span class="keyword">new</span> RPCServerOptions(vertx).setBusAddress(address).addService(<span class="keyword">new</span> MyServiceImpl());</span><br><span class="line"><span class="keyword">new</span> VertxRPCServer(rpcServerOptions);</span><br></pre></td></tr></table></figure>
+<p>以上四行代码就已经成功的定义了服务,是这里要注意<code>new MyServiceimpl()</code>必须实现<code>spi</code>项目里的<code>MyService</code>接口.下面我们来看调用方,怎么调用服务.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Vertx vertx = Vertx.vertx();</span><br><span class="line">String address = <span class="string">"serviceAddress"</span>;</span><br><span class="line"></span><br><span class="line">RPCClientOptions&lt;MyService&gt; rpcClientOptions = <span class="keyword">new</span> RPCClientOptions&lt;MyService&gt;(vertx).setBusAddress(address).setServiceClass(MyService.class);</span><br><span class="line">MyService myService = <span class="keyword">new</span> VertxRPCClient&lt;&gt;(rpcClientOptions).bindService();</span><br></pre></td></tr></table></figure>
+<p>这里本质上是两行代码,一行定义了rpcClient的配置通过<code>RPCClientOptions</code>,另外一行直接绑定服务,通过<code>VertxRPCClient.bindService()</code>.<br>最后得到了接口<code>MyService</code>.下面你就可以在客户端直接调用服务端的接口了,一切又回到了以前的面向接口编程 :)</p>
+<p>这里有个完整的<a href="https://github.com/stream1984/vertx-rpc-example" target="_blank" rel="external">项目例子</a>.我们把项目里的<code>SPI</code>定义接口,里面除了接口,还包含接口用到的对象以及异常.<br>以后所有的操作都是面向这个SPI来做,<code>service-impl</code>就实现了其接口,<code>outer-invoker</code>其实是外部的service依赖接口来调用<code>service-impl</code>.这便是完全面向接口编程.</p>
+<p>vertx-rpc除了包装EventBus使之可以通过Java标准方法调用外,还可以通过注解来定义每一个方法的超时时间.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="annotation">@RequestProp</span>(timeout = <span class="number">1</span>, timeUnit = TimeUnit.SECONDS, retry = <span class="number">2</span>)</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">hello</span><span class="params">(String what, Handler&lt;AsyncResult&lt;String&gt;&gt; handler)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>这里就对hello方法定义了超时时间,以及超时重试次数,非常方便用于幂等的方法.<br>上面的方法第二个参数是Vert.x的handler回调,这里也可以使用<code>RxJava</code>或者<code>Java8的CompletableFuture</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Observable&lt;String&gt; <span class="title">hello</span><span class="params">(String what)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//或者</span></span><br><span class="line"></span><br><span class="line">CompletableFuture&lt;String&gt; <span class="title">hello</span><span class="params">(String what)</span></span></span><br></pre></td></tr></table></figure>
+<p>具体可以参考<a href="https://github.com/stream1984/vertx-rpc-example" target="_blank" rel="external">项目例子</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.streamis.me/2015/05/26/vertx-rpckuang-jia/" data-id="cidzpu8bh000161456mgde5q8" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2014/10/06/vert-dot-x3-update/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Vert.x3 Update</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Emacs/">Emacs</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Storm/">Storm</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Vert-x/">Vert.x</a><span class="category-list-count">8</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Vert-x/Asynchronize-programming/">Asynchronize programming</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Vert-x/micro-service/">micro-service</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/vert-x源码分析/">vert.x源码分析</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">May 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/10/">October 2014</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/05/">May 2014</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/11/">November 2013</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/10/">October 2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/09/">September 2013</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recents</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2015/05/26/vertx-rpckuang-jia/">Vertx-rpc框架</a>
+          </li>
+        
+          <li>
+            <a href="/2014/10/06/vert-dot-x3-update/">Vert.x3 Update</a>
+          </li>
+        
+          <li>
+            <a href="/2014/05/06/vert-dot-xyu-lao-xiang-mu-jie-he/">Vert.x与老项目结合</a>
+          </li>
+        
+          <li>
+            <a href="/2014/05/04/vert-dot-xli-yi-bu-chu-li-di-san-fang-fu-wu/">Vert.x里异步处理第三方服务</a>
+          </li>
+        
+          <li>
+            <a href="/2014/05/02/os-x-xia-she-zhi-emacs-shellde-ls-color/">OS X 下设置Emacs Shell-mode 输出颜色</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 Stream Liu<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css">
+  <script src="/fancybox/jquery.fancybox.pack.js" type="text/javascript"></script>
+
+
+<script src="/js/script.js" type="text/javascript"></script>
+
+  </div>
+</body>
+</html>

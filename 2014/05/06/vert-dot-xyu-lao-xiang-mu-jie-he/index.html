@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Vert.x与老项目结合 | Writing for Thingking</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="已经很多人问过我,关于Vert.x如何与现有的项目结合在一起使用.具体的场景莫过于标准的Java三层结构中融合高性能的Vert.x我这里结合自己的项目总结一下.
+作为Web前端接入层在Java框架界里,Web层框架可选的不多,老牌的Apache旗下的struts2, 万能的Spring下有SpringMVC,以及Jersey基于标准的REST风格的框架.他们目前都是基于Servlet标准实现,所以">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Vert.x与老项目结合">
+<meta property="og:url" content="http://www.streamis.me/2014/05/06/vert-dot-xyu-lao-xiang-mu-jie-he/index.html">
+<meta property="og:site_name" content="Writing for Thingking">
+<meta property="og:description" content="已经很多人问过我,关于Vert.x如何与现有的项目结合在一起使用.具体的场景莫过于标准的Java三层结构中融合高性能的Vert.x我这里结合自己的项目总结一下.
+作为Web前端接入层在Java框架界里,Web层框架可选的不多,老牌的Apache旗下的struts2, 万能的Spring下有SpringMVC,以及Jersey基于标准的REST风格的框架.他们目前都是基于Servlet标准实现,所以">
+<meta property="og:updated_time" content="2014-06-17T00:33:00.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Vert.x与老项目结合">
+<meta name="twitter:description" content="已经很多人问过我,关于Vert.x如何与现有的项目结合在一起使用.具体的场景莫过于标准的Java三层结构中融合高性能的Vert.x我这里结合自己的项目总结一下.
+作为Web前端接入层在Java框架界里,Web层框架可选的不多,老牌的Apache旗下的struts2, 万能的Spring下有SpringMVC,以及Jersey基于标准的REST风格的框架.他们目前都是基于Servlet标准实现,所以">
+  
+    <link rel="alternative" href="/atom.xml" title="Writing for Thingking" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+  
+
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Writing for Thingking</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://www.streamis.me"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-vert-dot-xyu-lao-xiang-mu-jie-he" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2014/05/06/vert-dot-xyu-lao-xiang-mu-jie-he/" class="article-date">
+  <time datetime="2014-05-06T13:59:13.000Z" itemprop="datePublished">2014-05-06</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/Vert-x/">Vert.x</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Vert.x与老项目结合
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>已经很多人问过我,关于Vert.x如何与现有的项目结合在一起使用.具体的场景莫过于标准的Java三层结构中融合高性能的Vert.x<br>我这里结合自己的项目总结一下.</p>
+<h3 id="作为Web前端接入层">作为Web前端接入层</h3><p>在Java框架界里,Web层框架可选的不多,老牌的Apache旗下的<code>struts2</code>, 万能的Spring下有<code>SpringMVC</code>,以及<code>Jersey</code>基于标准的REST风格的框架.<br>他们目前都是基于<code>Servlet</code>标准实现,所以可以在主流的JavaWeb容器中随意切换.</p>
+<p>而<code>Vert.x</code>本身就是一个Web容器,同时提供简单的REST风格框架实现.所以如果你的项目不需要考虑Session以及Cookie.可以直接使用Vert.x作为Web前端请求接入.<br>我的项目里只有一个Web入口作为OpenAPI服务,所以不使用Session 与 Cookie验证请求方.</p>
+<p>另外如果你的Web服务是对内部人员使用,只是查看service上的一些性能数据,也可以直接使用Vert.x自带的REST框架.<br>如果你想Vert.x作为一个完整的Web容器以及支持标准的HTTP请求,且能基于HTTP开发框架的话,这里推荐两个</p>
+<ul>
+<li><p><a href="https://github.com/englishtown/vertx-mod-jersey" target="_blank" rel="external">mod-jersey</a><br>这个应该很流行,懂jersey,就可以直接使用.目前也支持Annotation.适合传统的JavaWeb开发者</p>
+</li>
+<li><p><a href="https://github.com/pmlopes/yoke" target="_blank" rel="external">Yoke</a><br>这个与NodeJS里的Express很像,扩展都是基于middleware来实现.适合习惯异步编程,NodeJS经验者</p>
+</li>
+<li><p>另外如果你使用Clojure,推荐本人的<a href="https://github.com/stream1984/ring-vertx-adapter" target="_blank" rel="external">ring-vertx-adapter</a><br>这个项目尚需进一步优化</p>
+</li>
+</ul>
+<h3 id="作为服务层处理逻辑">作为服务层处理逻辑</h3><p>这一层基本上对应的传统Java里的领域模型处理层.各种Service调用,以及对数据层的调用.差不多是一个承上启下的一层.<br>传统的模型里,这一层基本上都是同步调用,即使有异步调用,也是与业务逻辑分离的异步.如果全异步会导致业务逻辑碎乱.代码很难描述清楚.<br>到这里你会发现Vert.x其实不太好融合到业务性很强的服务层里.其主要原因如下</p>
+<ul>
+<li>自身是异步体系,不适合描述顺序逻辑性强的业务</li>
+<li>由于异步的问题,访问数据层也必须是异步,导致业务模型进一步碎片化.</li>
+</ul>
+<p>说实话,的确很难处理这一层,异步特别适合处理那种I/O消耗的应用,比如Web请求,磁盘的请求等.如果用他来处理那些本来就在内存里的事务,那<br>会显得有点蹩脚.这里举一个’栗子’:银行转账,传统的做法是在service的方法里,通过访问DAO得到两个账户,然后进行简单的加减即可.</p>
+<figure class="highlight cpp"><figcaption><span>example.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">transfer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  Account sourceAccount = accountDAO.getAccount(<span class="number">1</span>);</span><br><span class="line">  Account targetAccount = accountDAO.getAccount(<span class="number">2</span>);</span><br><span class="line">  sourceAccount.money--;</span><br><span class="line">  targetAccount.money++;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>但是在Vert.x里因为要访问的DAO不是同步的方式导致逻辑嵌套,显得代码很难理解.</p>
+<figure class="highlight protobuf"><figcaption><span>example.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//开启事务</span></span><br><span class="line">public void handler(Message&lt;JsonObject&gt; <span class="class"><span class="keyword">message</span>) &#123;</span></span><br><span class="line">  <span class="comment">//操作DAO对账户1做操作</span></span><br><span class="line">  eb.send(<span class="string">"mysql.address"</span>, obj, new Handelr&lt;Message&lt;JsonObject&gt;&gt;(Message <span class="class"><span class="keyword">message</span>)&#123;</span></span><br><span class="line">    <span class="comment">//在回调的Handler里继续操作2</span></span><br><span class="line">    eb.send(<span class="string">"mysql.address"</span> obj new Handler&lt;Message&lt;JsonObject&gt;&gt;(Message <span class="class"><span class="keyword">message</span>)&#123;</span></span><br><span class="line">    <span class="comment">//这里可以做事务上的提交</span></span><br><span class="line">    &#125;)</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Ugly,我们不能拿着斧子看什么都是钉子,所以我们保留对数据库操作,对其包装成一个EventBus,接受请求.具体可以产考我的上一篇文章<br><a href="http://www.streamis.me/blog/2014/05/04/vert-dot-xli-yi-bu-chu-li-di-san-fang-fu-wu/">Vert.x里异步处理第三方服务</a><br>这样就是拿Vert.x去处理I/O密集性的请求.传统的事务性请求还是同步处理.<br>具体做法大概就两种</p>
+<ul>
+<li>用Vert.x加载Spring获取其他Ioc容器,然后通过解析消息,来分发到对应的数据处理方法上.</li>
+<li>老的项目不做改动,但是启动的时候IoC容器去实例化一个嵌入式的Vert.x作为EventBus来接受请求.</li>
+</ul>
+<p>但是个人不推荐这么做,如果你想全栈都使用Vert.x的话.上面的方法只是过渡使用,而且并没有彻底解放同步请求数据库的问题.<br>关于如何全栈使用Vert.x的问题我留到下一篇细琢.</p>
+<h3 id="访问Mysql以及Nosql">访问Mysql以及Nosql</h3><p>Vert.x官方提供MYSQL,mongoDB,Redis等主流的数据层访问模块.<br>上面已经说了,数据库的访问其实是很恶心的,全异步的代码大部分人看起来很不舒服.<br>但是如果你一定要使用Redis,mongoDB的mod,建议再加一个模块,RxJava or vertx-mod-when其实这两个库应该是贯穿整个Vert.x项目的.<br>没有这两个库你几乎没有办法优雅的写程序.我们对比一下就知道了.这里偷懒就这件改上面的例子了</p>
+<figure class="highlight openscad"><figcaption><span>example.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//step 1:定义消息体</span></span><br><span class="line">JsonObject sourceAccountOperator = new JsonObject<span class="params">()</span>;</span><br><span class="line">msg.putString<span class="params">(<span class="string">"action"</span>, <span class="string">"update"</span>)</span></span><br><span class="line">        .putString<span class="params">(<span class="string">"sql"</span>, <span class="string">"update account set money = ? where id = ?"</span>)</span></span><br><span class="line">        .putArray<span class="params">(<span class="string">"values"</span>, new JsonArray<span class="params">([<span class="number">1</span>,<span class="number">1</span>])</span>)</span>;</span><br><span class="line"></span><br><span class="line">JsonObject targetAccountOperator = new JsonObject<span class="params">()</span>;</span><br><span class="line">msg.putString<span class="params">(<span class="string">"action"</span>, <span class="string">"update"</span>)</span></span><br><span class="line">        .putString<span class="params">(<span class="string">"sql"</span>, <span class="string">"update account set money = ? where id = ?"</span>)</span></span><br><span class="line">        .putArray<span class="params">(<span class="string">"values"</span>, new JsonArray<span class="params">([<span class="number">2</span>,<span class="number">2</span>])</span>)</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//step 2:发送消息</span></span><br><span class="line">Observable&lt;Message&lt;JsonObject&gt;&gt; accountOne =  eb.send<span class="params">(<span class="string">"mysql.address"</span>, sourceAccountOperator)</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//step 3:串联消息,必须在step2结束后才执行</span></span><br><span class="line">Observable&lt;Message&lt;JsonObject&gt;&gt; accountTwo = accountOne.flatMap<span class="params">(new Func1&lt;Message, Observable&lt;Message&gt;&gt;<span class="params">()</span> &#123;</span><br><span class="line">  @Override</span><br><span class="line">  public Observable&lt;RxMessage&gt; call<span class="params">(Message message)</span> &#123;</span><br><span class="line">    eb.send<span class="params">(<span class="string">"mysql.address"</span>, targetAccountOperator)</span>;</span><br><span class="line">  &#125;)</span>;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="comment">//step 4:处理结果</span></span><br><span class="line">accountTwo.subscribe<span class="params">(new Action1&lt;Message&gt;<span class="params">()</span> &#123;</span><br><span class="line">  @Override</span><br><span class="line">  public void call<span class="params">(Message message)</span> &#123;</span><br><span class="line">    //提交事务</span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span>;</span><br></pre></td></tr></table></figure>
+<p>上面的代码没有超过两层的嵌套,通过Rx模式,避免了callback Hell.但是上面的代码还是有点乱.借助第三方框架还能更加优雅的处理异步回调问题.<br>下次介绍我的rxBus.让Vert.x基于EventBus实现RPC调用.</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.streamis.me/2014/05/06/vert-dot-xyu-lao-xiang-mu-jie-he/" data-id="cidzpu8bm00086145exjc1aek" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2014/10/06/vert-dot-x3-update/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Vert.x3 Update
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2014/05/04/vert-dot-xli-yi-bu-chu-li-di-san-fang-fu-wu/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Vert.x里异步处理第三方服务</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Emacs/">Emacs</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Storm/">Storm</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Vert-x/">Vert.x</a><span class="category-list-count">8</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Vert-x/Asynchronize-programming/">Asynchronize programming</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Vert-x/micro-service/">micro-service</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/vert-x源码分析/">vert.x源码分析</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">May 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/10/">October 2014</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/05/">May 2014</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/11/">November 2013</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/10/">October 2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/09/">September 2013</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recents</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2015/05/26/vertx-rpckuang-jia/">Vertx-rpc框架</a>
+          </li>
+        
+          <li>
+            <a href="/2014/10/06/vert-dot-x3-update/">Vert.x3 Update</a>
+          </li>
+        
+          <li>
+            <a href="/2014/05/06/vert-dot-xyu-lao-xiang-mu-jie-he/">Vert.x与老项目结合</a>
+          </li>
+        
+          <li>
+            <a href="/2014/05/04/vert-dot-xli-yi-bu-chu-li-di-san-fang-fu-wu/">Vert.x里异步处理第三方服务</a>
+          </li>
+        
+          <li>
+            <a href="/2014/05/02/os-x-xia-she-zhi-emacs-shellde-ls-color/">OS X 下设置Emacs Shell-mode 输出颜色</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 Stream Liu<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css">
+  <script src="/fancybox/jquery.fancybox.pack.js" type="text/javascript"></script>
+
+
+<script src="/js/script.js" type="text/javascript"></script>
+
+  </div>
+</body>
+</html>

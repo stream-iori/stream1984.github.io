@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>vert-x内部线程分析 | Writing for Thingking</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="Vert.x是一个纯粹的异步事件架构,与NodeJS一样,一个业务需要大量的回调函数来完成.如果没有好的框架以及模式(Promise),整体代码都会陷入到回调的恶梦里(callback hell).这篇我先不聊如何避免这类情况，我们先Look Look如何构建基于回调机制的框架.
+一个Handler的故事如果你已经用Vert.x写过一些项目,我估计你最大的感受就是满屏的Handler,做任何事情都">
+<meta property="og:type" content="article">
+<meta property="og:title" content="vert-x内部线程分析">
+<meta property="og:url" content="http://www.streamis.me/2013/11/21/vert-xnei-bu-xian-cheng-fen-xi/index.html">
+<meta property="og:site_name" content="Writing for Thingking">
+<meta property="og:description" content="Vert.x是一个纯粹的异步事件架构,与NodeJS一样,一个业务需要大量的回调函数来完成.如果没有好的框架以及模式(Promise),整体代码都会陷入到回调的恶梦里(callback hell).这篇我先不聊如何避免这类情况，我们先Look Look如何构建基于回调机制的框架.
+一个Handler的故事如果你已经用Vert.x写过一些项目,我估计你最大的感受就是满屏的Handler,做任何事情都">
+<meta property="og:updated_time" content="2014-06-17T00:33:00.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="vert-x内部线程分析">
+<meta name="twitter:description" content="Vert.x是一个纯粹的异步事件架构,与NodeJS一样,一个业务需要大量的回调函数来完成.如果没有好的框架以及模式(Promise),整体代码都会陷入到回调的恶梦里(callback hell).这篇我先不聊如何避免这类情况，我们先Look Look如何构建基于回调机制的框架.
+一个Handler的故事如果你已经用Vert.x写过一些项目,我估计你最大的感受就是满屏的Handler,做任何事情都">
+  
+    <link rel="alternative" href="/atom.xml" title="Writing for Thingking" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+  
+
+</head>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Writing for Thingking</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://www.streamis.me"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-vert-xnei-bu-xian-cheng-fen-xi" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2013/11/21/vert-xnei-bu-xian-cheng-fen-xi/" class="article-date">
+  <time datetime="2013-11-21T08:04:00.000Z" itemprop="datePublished">2013-11-21</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/vert-x源码分析/">vert.x源码分析</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      vert-x内部线程分析
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Vert.x是一个纯粹的异步事件架构,与NodeJS一样,一个业务需要大量的回调函数来完成.<br>如果没有好的框架以及模式(Promise),整体代码都会陷入到回调的恶梦里(callback hell).<br>这篇我先不聊如何避免这类情况，我们先Look Look如何构建基于回调机制的框架.</p>
+<h3 id="一个Handler的故事">一个Handler的故事</h3><p>如果你已经用Vert.x写过一些项目,我估计你最大的感受就是满屏的Handler,做任何事情都需要用Handler来处理.<br>如果没有Handler你在Vert.x里寸步难行,那么Vert.x到底是如何运作一个Handler的呢.<br>我们这里以Vert.x最具代表的API- EventBus为例,来看看一个Handler是如何在Vert.x里运作的.</p>
+<p>直观上来看调用EventBus的send方法,然后最后一个参数设定为一个Handler的实现者,或者匿名类就可以让这个流程转起来,那么这个Handler的这send方法里是怎么存活的呢.如果并发的多次调用,又是怎么区分的呢,他们会不会乱掉,会不会认错彼此呢.下面我先得认识一些Vert.x内部的接口</p>
+<h4 id="重要的接口">重要的接口</h4><ul>
+<li><code>org.vertx.java.core.Handler</code></li>
+</ul>
+<p>Vert.x运行时的核心接口,你大部分的逻辑代码都会在这里执行.所以无需解释.</p>
+<ul>
+<li><code>org.vertx.java.core.Context</code></li>
+</ul>
+<p>前面我们已经说过Verticle的概念,这个名词的含义就是一个基于Vert.xAPI搭建起来的可运行的程序.<br>这里我们就简单的理解继承了<code>org.vertx.java.platform.Verticle</code>的Java类或者其他语言的脚本.<br>那<code>Context</code>接口就代表着一次可执行单元的上下文,这里的上下文只干一件事情就是处理Handler里的内容<br><code>void runOnContext(Handler&lt;Void&gt; action);</code>,在Vert.x里有两种上下文,即EventLoop与Worker,而Worker又会分按顺序执行的Worker与多线程Worker.这里我们就先看成两类EventLoop与Worker.so,什么是EventLoop呢.</p>
+<p>这是个好问题,详细的资料你可以参考<a href="http://en.wikipedia.org/wiki/Event_loop" target="_blank" rel="external">WIKI</a>我这里给出我的解释,在Vert.x里所有的事件包括IO都是依赖于Netty的EventLoop接口,而这个接口在Netty里会一定的频率调用.即当发生IO事件时,Netty会按时间比率分配CPU资源去响应这个事件.</p>
+<p>在Vert.x里你可以简单的理解为IO相关的事件就可以了,用了一个特定的线程池来响应这类请求.<br>而Worker在Vert.x里默认是一套按顺序执行的Handler,即按照先来先到的顺序依次执行,此类的请求是另一个线程池执行.</p>
+<ul>
+<li><code>org.vertx.java.core.Vertx</code></li>
+</ul>
+<p>这个其实就是API,非Vert.x扩展者,能用到的所有的东西都在这里了.<br>基于上面的三个接口,其实就能抽象出一个异步的模型,通过Vertx接口调用一个API,API内部会持有一个Context,在API本身的非业务逻辑执行完后,将Handler传入Context执行.这大概就是整个Vert.x内部执行的流程,三个接口抽象出一个世界这便是软件设计的哲学.</p>
+<p>那如何丰满这三个接口,使之正常的跑起来呢</p>
+<h3 id="Vert-x线程模型与执行上下文">Vert.x线程模型与执行上下文</h3><ul>
+<li>线程模型</li>
+</ul>
+<p>我们先来看看Vert.x怎么实现Context的,这是一个没有暴露给我们的接口.在内部维护EventLoop与Worker两种线程池,且有一个抽象实现者<code>org.vertx.java.core.impl.DefaultContext</code><br>内部维护着这两种线程池,分别是<code>EventLoop</code> 与 <code>orderedBgExec</code>,<code>EventLoop</code>是基于Netty的NioEventLoop产生,线程数目默认与CPU核数一致,而<code>orderedBgExec</code>的线程数目是固定的,模式20个，当然我们可以通过修改参数<code>vertx.pool.worker.size</code>来提升线程数目.这里需要注意的是orderBgExec内部是依赖一个<code>LinkedList&lt;Runnable&gt;</code>来维护顺序的,而且实现的非常巧妙.这里其实是parent Executor的一个委托.</p>
+<figure class="highlight gradle"><figcaption><span>OrderedExecutor OrderExec.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> OrderedExecutor(Executor parent) &#123;</span><br><span class="line">  <span class="keyword">this</span>.parent = parent;</span><br><span class="line">  runner = <span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> run() &#123;</span><br><span class="line">      <span class="keyword">for</span> (; ; ) &#123;</span><br><span class="line">        <span class="keyword">final</span> Runnable <span class="keyword">task</span>;</span><br><span class="line">        <span class="comment">//tasks 是一个 LinkedList</span></span><br><span class="line">        <span class="keyword">synchronized</span> (tasks) &#123;</span><br><span class="line">          <span class="keyword">task</span> = tasks.poll();</span><br><span class="line">          <span class="keyword">if</span> (<span class="keyword">task</span> == <span class="keyword">null</span>) &#123;</span><br><span class="line">            running = <span class="keyword">false</span>;</span><br><span class="line">            <span class="keyword">return</span>;</span><br><span class="line">          &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">          <span class="keyword">task</span>.run();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Throwable t) &#123;</span><br><span class="line">          log.error(<span class="string">"Caught unexpected Throwable"</span>, t);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Context具体行为</li>
+</ul>
+<p>我们知道Context的分类后,来看看它在Vert.x内部主要干了哪些工作,在这之前还有一个内部接口一直没有介绍,<code>VertxInternal</code>.<br>这其实是一个内部接口,外部API是用不到这些接口的,它主要封装了两种Context的生命周期,包括建立,获取,以及重新设置,里面还有两个<code>SharedData</code>.这个留到<br>后面再讲.我们回到Context的抽象类<code>DefaultContext</code>,会发现默认的构造函数里必须传入VertxInternal以便对两个Context的生命周期进行管理.<br><code>Context</code>接口只有一个方法需要实现<code>public void runOnContext(final Handler&lt;Void&gt; task)</code>,但是针对不同的Context有不同的执行方式,所以这里的DefaultContext<br>抽象类只是将一些共用的代码提取出来复用.这里面最主要的方法其实是<code>wrapTask(final Runnable task)</code>,他将接口传进来的Handler进行包装,成为<code>Runnable</code>后放入相关的线程池里<br>去执行.</p>
+<figure class="highlight openscad"><figcaption><span>WrapTask  WrapTask.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">protected Runnable wrapTask<span class="params">(final Runnable task)</span> &#123;</span><br><span class="line">return new Runnable<span class="params">()</span> &#123;</span><br><span class="line">  public void run<span class="params">()</span> &#123;</span><br><span class="line">    <span class="comment">//执行前要得到当前线程的名字,一般会是EventLoop或者Worker前缀</span></span><br><span class="line">    Thread currentThread = Thread.currentThread<span class="params">()</span>;</span><br><span class="line">    String threadName = currentThread.getName<span class="params">()</span>;</span><br><span class="line">    try &#123;</span><br><span class="line">      <span class="comment">//执行前,要设置Context,这其实是一个ThreadLocal绑定,下次会详细讲</span></span><br><span class="line">      vertx.setContext<span class="params">(DefaultContext.this)</span>;</span><br><span class="line">      task.run<span class="params">()</span>;</span><br><span class="line">    &#125; catch <span class="params">(Throwable t)</span> &#123;</span><br><span class="line">      reportException<span class="params">(t)</span>;</span><br><span class="line">    &#125; finally &#123;</span><br><span class="line">      <span class="keyword">if</span> <span class="params">(!threadName.equals<span class="params">(currentThread.getName<span class="params">()</span>)</span>)</span> &#123;</span><br><span class="line">        currentThread.setName<span class="params">(threadName)</span>;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> <span class="params">(closed)</span> &#123;</span><br><span class="line">      <span class="comment">//即使Context被关了,Task还是可以运行的,但是还会去执行unsetContext(),避免泄露</span></span><br><span class="line">      <span class="comment">//这里其实是remove一个ThreadLocal的绑定 </span></span><br><span class="line">      unsetContext<span class="params">()</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Context在Vert.x内部的调度</li>
+</ul>
+<p><code>VertxInternal</code>承载着整个Vert.x的内部运行,包括Actor节点的建立,线程池的创建,Socket服务在内部Verticle之间的共享,乃至集群的实现.<br>他像一个胶水一样,粘着外部API到Context之间.了解这个接口的实现,对Vert.x整体运行的过程会很有帮助,当你写代码的时候脑子里会不由自主的产生相关规划以及规约,<br>这其实就是一种框架带给你的哲学观.</p>
+<p>这里不一一列举其内部的实例变量,这里只讨论重点的,即如何处理一个<code>Handler</code>.以后逃了的服务启动,EventBus,以及集群的时候我们会回头再来看它.<br><code>private final ThreadLocal&lt;DefaultContext&gt; contextTL = new ThreadLocal&lt;&gt;();</code></p>
+<p>这个ThreadLocal是执行Handler的重点,他到底是怎么工作的呢.<br>因为每个Handler接口都是用户自己的业务逻辑,当Vert.x执行的时候会尝试得到当前线程的Context,如果发现当前线程没有Context的话,会直接创建一个新的.</p>
+<figure class="highlight aspectj"><figcaption><span>getOrCreateContext.java</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="function">DefaultContext <span class="title">getOrCreateContext</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    DefaultContext ctx = getContext();</span><br><span class="line">    <span class="keyword">if</span> (ctx == <span class="keyword">null</span>) &#123;</span><br><span class="line">    <span class="comment">// Create a context</span></span><br><span class="line">        ctx = createEventLoopContext();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> ctx;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里的createEventLoopContext,就是创建一个基于DefaultContext的EventLoop.有了Context之后,只需将Handler放入Context执行即可.注意这里都是EventLoopContext.<br>除非你指定你的模块为Worker,否则默认Vert.x都是基于EventLoop线程运行你的Handler.这也说明了为什么不要让一个Handler长时间运行的原因,因为你阻塞了IO的调用.导致Socket里的<br>数据不能及时被处理.</p>
+<h3 id="异步传说">异步传说</h3><p>至此,一个Handler的完整的旅行就结束了,让我们来回顾一下看看.<br>你通过Vert.x的API,传入一个包含了你的业务的Handler,Vert.x内部API调用createContext,来创建一个基于EventLoop的Context来运行这个Handler.<br>当下次再调用到这个线程的时候,不需要再次创建Context,直接从ThreadLocal里拿出来就可以了.</p>
+<p>当然其中的细节,远远没有你想的那么简单.下次我们来深度了解一下EventBus的相关事情.</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://www.streamis.me/2013/11/21/vert-xnei-bu-xian-cheng-fen-xi/" data-id="cidzpu8br000f6145y2k549xu" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2014/05/02/os-x-xia-she-zhi-emacs-shellde-ls-color/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          OS X 下设置Emacs Shell-mode 输出颜色
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2013/11/11/rang-stormfei-qi-lai/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">让Storm飞起来</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Emacs/">Emacs</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Storm/">Storm</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Vert-x/">Vert.x</a><span class="category-list-count">8</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Vert-x/Asynchronize-programming/">Asynchronize programming</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/Vert-x/micro-service/">micro-service</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/vert-x源码分析/">vert.x源码分析</a><span class="category-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/05/">May 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/10/">October 2014</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/05/">May 2014</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/11/">November 2013</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/10/">October 2013</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/09/">September 2013</a><span class="archive-list-count">1</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recents</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2015/05/26/vertx-rpckuang-jia/">Vertx-rpc框架</a>
+          </li>
+        
+          <li>
+            <a href="/2014/10/06/vert-dot-x3-update/">Vert.x3 Update</a>
+          </li>
+        
+          <li>
+            <a href="/2014/05/06/vert-dot-xyu-lao-xiang-mu-jie-he/">Vert.x与老项目结合</a>
+          </li>
+        
+          <li>
+            <a href="/2014/05/04/vert-dot-xli-yi-bu-chu-li-di-san-fang-fu-wu/">Vert.x里异步处理第三方服务</a>
+          </li>
+        
+          <li>
+            <a href="/2014/05/02/os-x-xia-she-zhi-emacs-shellde-ls-color/">OS X 下设置Emacs Shell-mode 输出颜色</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 Stream Liu<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css">
+  <script src="/fancybox/jquery.fancybox.pack.js" type="text/javascript"></script>
+
+
+<script src="/js/script.js" type="text/javascript"></script>
+
+  </div>
+</body>
+</html>
