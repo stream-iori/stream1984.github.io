@@ -1,4 +1,136 @@
-<!DOCTYPE html><html lang="zh"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>让Storm飞起来 | Writing for Thingking</title><link rel="stylesheet" type="text/css" href="/css/normalize.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="/css/pure-min.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="/css/grids-responsive-min.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.5.0/css/font-awesome.min.css"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">让Storm飞起来</h1><a id="logo" href="/.">Writing for Thingking</a><p class="description"></p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> Start</i></a><a href="/archives/"><i class="fa fa-archive"> Archiv</i></a><a href="/about/"><i class="fa fa-user"> Über</i></a><a href="/atom.xml"><i class="fa fa-rss"> RSS</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">让Storm飞起来</h1><div class="post-meta">Nov 11, 2013<span> | </span><span class="category"><a href="/categories/Storm/">Storm</a></span><script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><span id="busuanzi_container_page_pv"> | <span id="busuanzi_value_page_pv"></span><span> Hits</span></span></div><div class="post-content"><p>一年前就开始关注Storm,不过当时因为其他事情一直没有机会深入了解Storm,当时也在使用ZeroMQ发现很容易造成泄漏问题,而且ZeroMQ开始出现版本<br>分裂(ZeroMQ 3系列好像是需要收费的),就没这么研究下去,精力全都去配置Emacs,学Clojure去了.<br>最近故地重游,发现Yahoo对Storm做了点贡献,传输层可插拔,添加了Netty的支持,很Nice.这里有一遍对替换后的性能测试文章.</p>
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1,minimum-scale=1,maximum-scale=1">
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+  <meta name="description" content="让Storm飞起来"/>
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/default" title="Writing for Thingking">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=1.1" />
+
+
+
+<link rel="canonical" href="http://www.streamis.me/2013/11/11/rang-stormfei-qi-lai/"/>
+
+
+<meta name="description" content="一年前就开始关注Storm,不过当时因为其他事情一直没有机会深入了解Storm,当时也在使用ZeroMQ发现很容易造成泄漏问题,而且ZeroMQ开始出现版本分裂(ZeroMQ 3系列好像是需要收费的),就没这么研究下去,精力全都去配置Emacs,学Clojure去了.最近故地重游,发现Yahoo对Storm做了点贡献,传输层可插拔,添加了Netty的支持,很Nice.这里有一遍对替换后的性能测试文">
+<meta property="og:type" content="article">
+<meta property="og:title" content="让Storm飞起来">
+<meta property="og:url" content="http://www.streamis.me/2013/11/11/rang-stormfei-qi-lai/index.html">
+<meta property="og:site_name" content="Writing for Thingking">
+<meta property="og:description" content="一年前就开始关注Storm,不过当时因为其他事情一直没有机会深入了解Storm,当时也在使用ZeroMQ发现很容易造成泄漏问题,而且ZeroMQ开始出现版本分裂(ZeroMQ 3系列好像是需要收费的),就没这么研究下去,精力全都去配置Emacs,学Clojure去了.最近故地重游,发现Yahoo对Storm做了点贡献,传输层可插拔,添加了Netty的支持,很Nice.这里有一遍对替换后的性能测试文">
+<meta property="og:locale" content="zh">
+<meta property="og:image" content="https://lh5.googleusercontent.com/ofF2IcR8CmMac62YjMFgHP30PmmZ4QspU2BSID54fYN8lJRdrNd_0wPH6UVSPiiTcZMIL7hkdky8BaXmQRRgwdD38HR1wBATFbcnwxr-lK6XeLUWkVwTetQy">
+<meta property="og:image" content="https://lh5.googleusercontent.com/0ne5JXPaoRF4YbhHpB88LRXb41vbvC_mHDsP2P0AVmgfFDFWFbbmWDJP2QVSlJDlu7_nj9OErXd6H_8zPkAgyNhX7LrPk2olL-bP7sJ2O0Ac-1I5TArDuKUC">
+<meta property="og:updated_time" content="2014-06-17T00:33:00.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="让Storm飞起来">
+<meta name="twitter:description" content="一年前就开始关注Storm,不过当时因为其他事情一直没有机会深入了解Storm,当时也在使用ZeroMQ发现很容易造成泄漏问题,而且ZeroMQ开始出现版本分裂(ZeroMQ 3系列好像是需要收费的),就没这么研究下去,精力全都去配置Emacs,学Clojure去了.最近故地重游,发现Yahoo对Storm做了点贡献,传输层可插拔,添加了Netty的支持,很Nice.这里有一遍对替换后的性能测试文">
+<meta name="twitter:image" content="https://lh5.googleusercontent.com/ofF2IcR8CmMac62YjMFgHP30PmmZ4QspU2BSID54fYN8lJRdrNd_0wPH6UVSPiiTcZMIL7hkdky8BaXmQRRgwdD38HR1wBATFbcnwxr-lK6XeLUWkVwTetQy">
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=1.1" />
+<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet'>
+
+
+
+
+
+<script type="text/javascript">
+  var themeConfig = {
+    fancybox: {
+      enable: false
+    },
+  };
+</script>
+
+
+
+
+  
+
+
+
+    <title> 让Storm飞起来 - Writing for Thingking </title>
+  </head>
+
+  <body>
+    <div id="page">
+      <header id="masthead"><div class="site-header-inner">
+    <h1 class="site-title">
+        <a href="/." class="logo">Writing for Thingking</a>
+    </h1>
+
+    <nav id="nav-top">
+        
+            <ul id="menu-top" class="nav-top-items">
+                
+                    <li class="menu-item">
+                        <a href="/archives">
+                            
+                            
+                                Archives
+                            
+                        </a>
+                    </li>
+                
+                    <li class="menu-item">
+                        <a href="/about">
+                            
+                            
+                                About
+                            
+                        </a>
+                    </li>
+                
+            </ul>
+        
+  </nav>
+</div>
+
+      </header>
+      <div id="content">
+        
+    <div id="primary">
+        
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          让Storm飞起来
+        
+      </h1>
+
+      <time class="post-time">
+          Nov 11 2013
+      </time>
+    </header>
+
+
+
+    
+            <div class="post-content">
+            <p>一年前就开始关注Storm,不过当时因为其他事情一直没有机会深入了解Storm,当时也在使用ZeroMQ发现很容易造成泄漏问题,而且ZeroMQ开始出现版本<br>分裂(ZeroMQ 3系列好像是需要收费的),就没这么研究下去,精力全都去配置Emacs,学Clojure去了.<br>最近故地重游,发现Yahoo对Storm做了点贡献,传输层可插拔,添加了Netty的支持,很Nice.这里有一遍对替换后的性能测试文章.</p>
 <p>目前看来对Java开发者而言,用Netty替换ZeroMQ最大的好处是,取消了对原生的库的依赖,做了真正的跨平台,测试与部署开发方便性得到了极大的提高.<br>但是,最最让人Happy的是性能提高了两倍,消息传输速度提高了两倍.使对带宽利用更加充分.</p>
 <h3 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h3><p>Yahoo内部已经使用Netty代替ZeroMQ作为消息传输,但是在使用之前他们自己写了一个直接让ZeroMQ达到极限的<a href="https://github.com/yahoo/storm-perf-test" target="_blank" rel="external">例子</a>.<br>这个例子充分的展现了Storm传输消息是多么的迅速.</p>
 <p>这里一开始部署配置了一个非常小的拓扑,3个workers,3个bolt和3个spout,然后慢慢增长到408worker,上千个bolt和spout消息的大小也是不一样的.<br>所有的测试中消息的ACK也是启用的,每个spout允许挂起1000个消息,因此这里也有一些流控系统.Yahoo做了多次测试，每次测试的浮动大约在5%.</p>
@@ -15,4 +147,82 @@
 </ul>
 <p>但是Netty默认设置并不能很好的处理大量的短消息,即使设置了每个节点一个worker.但是如果我们限制线程数目为1的时候,可以得到111%-85%的每秒消息量提升。<br>因为短小的消息JAVA处理起来非常非常的快,于是线程切换又一次影响了性能.</p>
 <h1 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h1><p>默认的Netty设置已经超过zeroMQ两倍的性能.而且已经用在Yahoo内部.<br>最后有相关的配置与命令,以及配置信息,这里给出贴出<a href="http://yahooeng.tumblr.com/post/64758709722/making-storm-fly-with-netty" target="_blank" rel="external">原文</a>.</p>
-</div><a data-url="http://www.streamis.me/2013/11/11/rang-stormfei-qi-lai/" data-id="cj8v0fz6w0005iv45ojca2fk2" class="article-share-link">Aktie</a><div class="tags"></div><div class="post-nav"><a href="/2013/11/21/vert-xnei-bu-xian-cheng-fen-xi/" class="pre">vert-x内部线程分析</a><a href="/2013/10/24/vert-dot-xmo-kuai-shen-ru/" class="next">Vert.x模块深入</a></div></div></div></div><div class="pure-u-1-4"><div id="sidebar"><div class="widget"><form action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank" class="search-form"><input type="text" name="q" maxlength="20" placeholder="Search"/><input type="hidden" name="sitesearch" value="http://www.streamis.me"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> Kategorien</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Emacs/">Emacs</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Storm/">Storm</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Vert-x/">Vert.x</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Vert-x/Asynchronize-programming/">Asynchronize programming</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Vert-x/micro-service/">micro-service</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/vert-x源码分析/">vert.x源码分析</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> Tags</i></div><div class="tagcloud"><a href="/tags/vert-x/" style="font-size: 15px;">vert.x</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> Letzte</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/09/29/java-next-generation-2/">次时代Java编程(二) vertx-lang-kotlin-coroutines介绍</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/06/01/raft/">raft理解</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/19/java-next-generation-1-1/">次时代Java编程(一):续 vertx-sync实践</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/04/java-next-generation-1/">次时代Java编程(一) Java里的协程</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/05/26/vertx-rpckuang-jia/">Vertx-rpc框架</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/10/06/vert-dot-x3-update/">Vert.x3 Update</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/05/06/vert-dot-xyu-lao-xiang-mu-jie-he/">Vert.x与老项目结合</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/05/04/vert-dot-xli-yi-bu-chu-li-di-san-fang-fu-wu/">Vert.x里异步处理第三方服务</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/05/02/os-x-xia-she-zhi-emacs-shellde-ls-color/">OS X 下设置Emacs Shell-mode 输出颜色</a></li><li class="post-list-item"><a class="post-list-link" href="/2013/11/21/vert-xnei-bu-xian-cheng-fen-xi/">vert-x内部线程分析</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> Blogroll</i></div><ul></ul><a href="http://www.example1.com/" title="site-name1" target="_blank">site-name1</a><ul></ul><a href="http://www.example2.com/" title="site-name2" target="_blank">site-name2</a><ul></ul><a href="http://www.example3.com/" title="site-name3" target="_blank">site-name3</a></div></div></div></div><div id="footer">© <a href="/." rel="nofollow">Writing for Thingking.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/js/jquery.min.js?v=0.0.0"></script><script type="text/javascript" src="/js/totop.js?v=0.0.0"></script><script type="text/javascript" src="/js/fancybox.pack.js?v=0.0.0"></script><script type="text/javascript" src="/js/jquery.fancybox.js?v=0.0.0"></script><link rel="stylesheet" type="text/css" href="/css/jquery.fancybox.css?v=0.0.0"><script type="text/javascript" src="/js/share.js?v=0.0.0"></script><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>
+
+            </div>
+          
+
+    
+      <footer class="post-footer">
+		
+
+        
+        
+  <nav class="post-nav">
+    
+      <a class="prev" href="/2013/11/21/vert-xnei-bu-xian-cheng-fen-xi/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">vert-x内部线程分析</span>
+        <span class="prev-text nav-mobile">Prev</span>
+      </a>
+    
+    
+      <a class="next" href="/2013/10/24/vert-dot-xmo-kuai-shen-ru/">
+        <span class="next-text nav-default">Vert.x模块深入</span>
+        <span class="prev-text nav-mobile">Next</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+        
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+      </footer>
+    
+  </article>
+
+    </div>
+
+      </div>
+
+      <footer id="colophon"><span class="copyright-year">
+    
+        &copy;
+    
+        2014 -
+    
+    2017
+    <span class="footer-author">Stream Liu.</span>
+    <span class="power-by">
+        Powered by <a class="hexo-link" href="https://hexo.io/">Hexo</a> and <a class="theme-link" href="https://github.com/frostfan/hexo-theme-polarbear">Polar Bear</a>
+    </span>
+</span>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+    
+
+
+    
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+
+    <script type="text/javascript" src="/js/src/theme.js?v=1.1"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=1.1"></script>
+
+  </body>
+</html>

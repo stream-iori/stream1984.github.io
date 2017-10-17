@@ -1,4 +1,133 @@
-<!DOCTYPE html><html lang="zh"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>次时代Java编程(一):续 vertx-sync实践 | Writing for Thingking</title><link rel="stylesheet" type="text/css" href="/css/normalize.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="/css/pure-min.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="/css/grids-responsive-min.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.5.0/css/font-awesome.min.css"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">次时代Java编程(一):续 vertx-sync实践</h1><a id="logo" href="/.">Writing for Thingking</a><p class="description"></p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> Start</i></a><a href="/archives/"><i class="fa fa-archive"> Archiv</i></a><a href="/about/"><i class="fa fa-user"> Über</i></a><a href="/atom.xml"><i class="fa fa-rss"> RSS</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">次时代Java编程(一):续 vertx-sync实践</h1><div class="post-meta">Jul 19, 2016<script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><span id="busuanzi_container_page_pv"> | <span id="busuanzi_value_page_pv"></span><span> Hits</span></span></div><div class="post-content"><h3 id="次时代Java编程-一-续-vertx-sync实践"><a href="#次时代Java编程-一-续-vertx-sync实践" class="headerlink" title="次时代Java编程(一):续 vertx-sync实践"></a>次时代Java编程(一):续 vertx-sync实践</h3><p>本来打算另起一篇，写其他方面的东西，但是最近比较忙，就先写一篇实践方面的文章。  </p>
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1,minimum-scale=1,maximum-scale=1">
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+  <meta name="description" content="次时代Java编程(一):续 vertx-sync实践"/>
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/default" title="Writing for Thingking">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=1.1" />
+
+
+
+<link rel="canonical" href="http://www.streamis.me/2016/07/19/java-next-generation-1-1/"/>
+
+
+<meta name="description" content="次时代Java编程(一):续 vertx-sync实践本来打算另起一篇，写其他方面的东西，但是最近比较忙，就先写一篇实践方面的文章。   vertx-sync是什么上一篇我们已经讲了 Fiber 相关的知识，想必大家对Java实现类似Golang的coroutine已经有印象了，既然Java世界里有第三方提供了这么好的库，那我们就看看怎么跟 vert.x 结合起来使用。   vert.x官方为了解">
+<meta property="og:type" content="article">
+<meta property="og:title" content="次时代Java编程(一):续 vertx-sync实践">
+<meta property="og:url" content="http://www.streamis.me/2016/07/19/java-next-generation-1-1/index.html">
+<meta property="og:site_name" content="Writing for Thingking">
+<meta property="og:description" content="次时代Java编程(一):续 vertx-sync实践本来打算另起一篇，写其他方面的东西，但是最近比较忙，就先写一篇实践方面的文章。   vertx-sync是什么上一篇我们已经讲了 Fiber 相关的知识，想必大家对Java实现类似Golang的coroutine已经有印象了，既然Java世界里有第三方提供了这么好的库，那我们就看看怎么跟 vert.x 结合起来使用。   vert.x官方为了解">
+<meta property="og:locale" content="zh">
+<meta property="og:updated_time" content="2016-07-19T11:30:13.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="次时代Java编程(一):续 vertx-sync实践">
+<meta name="twitter:description" content="次时代Java编程(一):续 vertx-sync实践本来打算另起一篇，写其他方面的东西，但是最近比较忙，就先写一篇实践方面的文章。   vertx-sync是什么上一篇我们已经讲了 Fiber 相关的知识，想必大家对Java实现类似Golang的coroutine已经有印象了，既然Java世界里有第三方提供了这么好的库，那我们就看看怎么跟 vert.x 结合起来使用。   vert.x官方为了解">
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=1.1" />
+<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet'>
+
+
+
+
+
+<script type="text/javascript">
+  var themeConfig = {
+    fancybox: {
+      enable: false
+    },
+  };
+</script>
+
+
+
+
+  
+
+
+
+    <title> 次时代Java编程(一):续 vertx-sync实践 - Writing for Thingking </title>
+  </head>
+
+  <body>
+    <div id="page">
+      <header id="masthead"><div class="site-header-inner">
+    <h1 class="site-title">
+        <a href="/." class="logo">Writing for Thingking</a>
+    </h1>
+
+    <nav id="nav-top">
+        
+            <ul id="menu-top" class="nav-top-items">
+                
+                    <li class="menu-item">
+                        <a href="/archives">
+                            
+                            
+                                Archives
+                            
+                        </a>
+                    </li>
+                
+                    <li class="menu-item">
+                        <a href="/about">
+                            
+                            
+                                About
+                            
+                        </a>
+                    </li>
+                
+            </ul>
+        
+  </nav>
+</div>
+
+      </header>
+      <div id="content">
+        
+    <div id="primary">
+        
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          次时代Java编程(一):续 vertx-sync实践
+        
+      </h1>
+
+      <time class="post-time">
+          Jul 19 2016
+      </time>
+    </header>
+
+
+
+    
+            <div class="post-content">
+            <h3 id="次时代Java编程-一-续-vertx-sync实践"><a href="#次时代Java编程-一-续-vertx-sync实践" class="headerlink" title="次时代Java编程(一):续 vertx-sync实践"></a>次时代Java编程(一):续 vertx-sync实践</h3><p>本来打算另起一篇，写其他方面的东西，但是最近比较忙，就先写一篇实践方面的文章。  </p>
 <h4 id="vertx-sync是什么"><a href="#vertx-sync是什么" class="headerlink" title="vertx-sync是什么"></a>vertx-sync是什么</h4><p>上一篇我们已经讲了 <strong>Fiber</strong> 相关的知识，想必大家对Java实现类似Golang的coroutine已经有印象了，既然Java世界里有第三方提供了这么好的库，<br>那我们就看看怎么跟 <strong>vert.x</strong> 结合起来使用。  </p>
 <p>vert.x官方为了解决异步代码编写的困难，使之更加同步化对开发人员更友好，便基于quasar包装了一个的同步库，<a href="https://github.com/vert-x3/vertx-sync/" target="_blank" rel="external">vertx-sync</a>，该库的作者同样也是vert.x的原作者，所以完成度还是很高的。<br>vertx-sync 对外只是暴露了几个简单的静态API，来完成对vert.x体系内一系列的操作包装，其实主要也就是三静态API而已。  </p>
 <ul>
@@ -7,24 +136,102 @@
 <li>Sync.awaitResult 从Handler里返回一个异步事件结果(同步的)，且 <strong>不会阻塞EventLoop</strong>  </li>
 </ul>
 <p>直接看介绍可能有点不直观，下面跑几个例子。  </p>
-<h4 id="使用vertx-sync"><a href="#使用vertx-sync" class="headerlink" title="使用vertx-sync"></a>使用vertx-sync</h4><p>之前介绍过quasar，如果你希望在项目里使用coroutine的话，需要在JVM里设置一个参数，用于应用启动前修改字节码(注入一些中断方法)，从而可以达到协程的目的。<br>具体方法也很简单。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-javaagent:/path/to/the/quasar-core-0.7.5-jdk8.jar</span><br></pre></td></tr></table></figure></p>
+<h4 id="使用vertx-sync"><a href="#使用vertx-sync" class="headerlink" title="使用vertx-sync"></a>使用vertx-sync</h4><p>之前介绍过quasar，如果你希望在项目里使用coroutine的话，需要在JVM里设置一个参数，用于应用启动前修改字节码(注入一些中断方法)，从而可以达到协程的目的。<br>具体方法也很简单。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">-javaagent:/path/to/the/quasar-core-0.7.5-jdk8.jar</div></pre></td></tr></table></figure></p>
 <p>如果是基于Maven跑单元测试，那只需要引用quasar instrument的插件就可以里  </p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.vlkan<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>quasar-maven-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">version</span>&gt;</span>0.7.3<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">check</span>&gt;</span>true<span class="tag">&lt;/<span class="name">check</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">debug</span>&gt;</span>true<span class="tag">&lt;/<span class="name">debug</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">verbose</span>&gt;</span>true<span class="tag">&lt;/<span class="name">verbose</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">executions</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">execution</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">goals</span>&gt;</span></span><br><span class="line">				<span class="tag">&lt;<span class="name">goal</span>&gt;</span>instrument<span class="tag">&lt;/<span class="name">goal</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;/<span class="name">goals</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">execution</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">executions</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">groupId</span>&gt;</span>co.paralleluniverse<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>quasar-core<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">			<span class="tag">&lt;<span class="name">version</span>&gt;</span>0.7.5<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">plugin</span>&gt;</span></div><div class="line">	<span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.vlkan<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">	<span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>quasar-maven-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">	<span class="tag">&lt;<span class="name">version</span>&gt;</span>0.7.3<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line">	<span class="tag">&lt;<span class="name">configuration</span>&gt;</span></div><div class="line">		<span class="tag">&lt;<span class="name">check</span>&gt;</span>true<span class="tag">&lt;/<span class="name">check</span>&gt;</span></div><div class="line">		<span class="tag">&lt;<span class="name">debug</span>&gt;</span>true<span class="tag">&lt;/<span class="name">debug</span>&gt;</span></div><div class="line">		<span class="tag">&lt;<span class="name">verbose</span>&gt;</span>true<span class="tag">&lt;/<span class="name">verbose</span>&gt;</span></div><div class="line">	<span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></div><div class="line">	<span class="tag">&lt;<span class="name">executions</span>&gt;</span></div><div class="line">		<span class="tag">&lt;<span class="name">execution</span>&gt;</span></div><div class="line">			<span class="tag">&lt;<span class="name">goals</span>&gt;</span></div><div class="line">				<span class="tag">&lt;<span class="name">goal</span>&gt;</span>instrument<span class="tag">&lt;/<span class="name">goal</span>&gt;</span></div><div class="line">			<span class="tag">&lt;/<span class="name">goals</span>&gt;</span></div><div class="line">		<span class="tag">&lt;/<span class="name">execution</span>&gt;</span></div><div class="line">	<span class="tag">&lt;/<span class="name">executions</span>&gt;</span></div><div class="line">	<span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></div><div class="line">		<span class="tag">&lt;<span class="name">dependency</span>&gt;</span></div><div class="line">			<span class="tag">&lt;<span class="name">groupId</span>&gt;</span>co.paralleluniverse<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">			<span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>quasar-core<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">			<span class="tag">&lt;<span class="name">version</span>&gt;</span>0.7.5<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line">		<span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></div><div class="line">	<span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></div></pre></td></tr></table></figure>
 <p>上面是一些非常必要的准备工作，否则你无法使用quasar以及vertx-sync。</p>
 <h5 id="vertx定时器例子"><a href="#vertx定时器例子" class="headerlink" title="vertx定时器例子"></a>vertx定时器例子</h5><p>之前通过vert.x调用定时器，需要传一个回调handler，然后所有的代码逻辑都包在里面。  </p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">vertx.setTimer(<span class="number">1000L</span>, h -&gt; &#123;</span><br><span class="line">	System.out.println(<span class="string">"time's up"</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-<p>现在我们来重新塑造一下三观。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">awaitEvent(h -&gt; vertx.setTimer(<span class="number">1000L</span>, h));</span><br><span class="line">System.out.println(<span class="string">"time's up"</span>);</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">vertx.setTimer(<span class="number">1000L</span>, h -&gt; &#123;</div><div class="line">	System.out.println(<span class="string">"time's up"</span>);</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+<p>现在我们来重新塑造一下三观。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">awaitEvent(h -&gt; vertx.setTimer(<span class="number">1000L</span>, h));</div><div class="line">System.out.println(<span class="string">"time's up"</span>);</div></pre></td></tr></table></figure></p>
 <p>这里定时器会阻塞在awaitEvent这一行，直到一秒后才会执行下面的一行。有点类似执行 <em>Thread.sleep(1000L)</em>，但是并不会阻塞 <strong>EventLoop</strong> 因为quasar会在EventLoop基础之上再开启一个fiber。<br>下面我看个稍微复杂点的例子。  </p>
 <h5 id="HTTP-Client请求例子"><a href="#HTTP-Client请求例子" class="headerlink" title="HTTP Client请求例子"></a>HTTP Client请求例子</h5><p>我们先用传统的回调方式使用vert.x的HttpClient API。  </p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">HttpClientRequest httpClientRequest = vertx.createHttpClient().get(<span class="string">"leapcloud.cn"</span>);</span><br><span class="line">httpClientRequest.handler(response -&gt; &#123;</span><br><span class="line">	response.handler(responseBody -&gt; &#123;</span><br><span class="line">		System.out.println(responseBody.toString());</span><br><span class="line">	&#125;);</span><br><span class="line">&#125;).end();</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">HttpClientRequest httpClientRequest = vertx.createHttpClient().get(<span class="string">"leapcloud.cn"</span>);</div><div class="line">httpClientRequest.handler(response -&gt; &#123;</div><div class="line">	response.handler(responseBody -&gt; &#123;</div><div class="line">		System.out.println(responseBody.toString());</div><div class="line">	&#125;);</div><div class="line">&#125;).end();</div></pre></td></tr></table></figure>
 <p>这里有两层回调嵌套，一层是得到Http的Response，另一层是从Response里得到详细的body。因为有lambda表达式才使得Java现在看起来并不是那么恶心。但是如果我们需要根据body的内容进一步做判断去继续请求其他页面，则嵌套会变的非常的深。下面尝试改造成sync方式看看。  </p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">HttpClientRequest httpClientRequest = vertx.createHttpClient().get(<span class="string">"leapcloud.cn"</span>);</span><br><span class="line">HttpClientResponse response = awaitEvent(Sync::fiberHandler);</span><br><span class="line">Buffer body = awaitEvent(response::handler);</span><br><span class="line">System.out.println(body.toString());</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">HttpClientRequest httpClientRequest = vertx.createHttpClient().get(<span class="string">"leapcloud.cn"</span>);</div><div class="line">HttpClientResponse response = awaitEvent(Sync::fiberHandler);</div><div class="line">Buffer body = awaitEvent(response::handler);</div><div class="line">System.out.println(body.toString());</div></pre></td></tr></table></figure>
 <p>额，是不是感觉看着很舒服，无嵌套，直接顺序下来，非常的直观，加上Java8特有的方法引用，会让代码更精简。  </p>
-<h5 id="通过vertx-sync使用Vert-x-JDBC"><a href="#通过vertx-sync使用Vert-x-JDBC" class="headerlink" title="通过vertx-sync使用Vert.x JDBC"></a>通过vertx-sync使用Vert.x JDBC</h5><p>写过vert.x同学肯定知道其vertx-jdbc-client为了使其兼容异步开发模型，将JDBC的底层线程池用异步方式包装了一下，也就是说JDBC层还是通过线程池去访问数据库的，但是是通过vert.x的context做了层封装，使其可以将结果放到对应的 <strong>EventLoop</strong> 里，这样比较符合vert.x的开发风格。但是带来的弊端就是嵌套太深。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> JDBCClient client = JDBCClient.createShared(vertx, <span class="keyword">new</span> JsonObject()</span><br><span class="line">.put(<span class="string">"url"</span>, <span class="string">"jdbc:hsqldb:mem:test?shutdown=true"</span>)</span><br><span class="line">.put(<span class="string">"driver_class"</span>, <span class="string">"org.hsqldb.jdbcDriver"</span>)</span><br><span class="line">.put(<span class="string">"max_pool_size"</span>, <span class="number">30</span>));</span><br><span class="line"></span><br><span class="line">client.getConnection(conn -&gt; &#123;</span><br><span class="line">	<span class="keyword">if</span> (conn.failed()) &#123;</span><br><span class="line">		System.err.println(conn.cause().getMessage());</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">final</span> SQLConnection connection = conn.result();</span><br><span class="line">	connection.execute(<span class="string">"create table test(id int primary key, name varchar(255))"</span>, res -&gt; &#123;</span><br><span class="line">		<span class="keyword">if</span> (res.failed()) &#123;</span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(res.cause());</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// insert some test data</span></span><br><span class="line">		connection.execute(<span class="string">"insert into test values(1, 'Hello')"</span>, insert -&gt; &#123;</span><br><span class="line">			<span class="comment">// query some data</span></span><br><span class="line">			connection.query(<span class="string">"select * from test"</span>, rs -&gt; &#123;</span><br><span class="line">				<span class="keyword">for</span> (JsonArray line : rs.result().getResults()) &#123;</span><br><span class="line">					System.out.println(line.encode());</span><br><span class="line">				&#125;</span><br><span class="line"></span><br><span class="line">				<span class="comment">// and close the connection</span></span><br><span class="line">				connection.close(done -&gt; &#123;</span><br><span class="line">					<span class="keyword">if</span> (done.failed()) &#123;</span><br><span class="line">						<span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(done.cause());</span><br><span class="line">					&#125;</span><br><span class="line">				&#125;);</span><br><span class="line">			&#125;);</span><br><span class="line">		&#125;);</span><br><span class="line">	&#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></p>
+<h5 id="通过vertx-sync使用Vert-x-JDBC"><a href="#通过vertx-sync使用Vert-x-JDBC" class="headerlink" title="通过vertx-sync使用Vert.x JDBC"></a>通过vertx-sync使用Vert.x JDBC</h5><p>写过vert.x同学肯定知道其vertx-jdbc-client为了使其兼容异步开发模型，将JDBC的底层线程池用异步方式包装了一下，也就是说JDBC层还是通过线程池去访问数据库的，但是是通过vert.x的context做了层封装，使其可以将结果放到对应的 <strong>EventLoop</strong> 里，这样比较符合vert.x的开发风格。但是带来的弊端就是嵌套太深。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">final</span> JDBCClient client = JDBCClient.createShared(vertx, <span class="keyword">new</span> JsonObject()</div><div class="line">.put(<span class="string">"url"</span>, <span class="string">"jdbc:hsqldb:mem:test?shutdown=true"</span>)</div><div class="line">.put(<span class="string">"driver_class"</span>, <span class="string">"org.hsqldb.jdbcDriver"</span>)</div><div class="line">.put(<span class="string">"max_pool_size"</span>, <span class="number">30</span>));</div><div class="line"></div><div class="line">client.getConnection(conn -&gt; &#123;</div><div class="line">	<span class="keyword">if</span> (conn.failed()) &#123;</div><div class="line">		System.err.println(conn.cause().getMessage());</div><div class="line">		<span class="keyword">return</span>;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="keyword">final</span> SQLConnection connection = conn.result();</div><div class="line">	connection.execute(<span class="string">"create table test(id int primary key, name varchar(255))"</span>, res -&gt; &#123;</div><div class="line">		<span class="keyword">if</span> (res.failed()) &#123;</div><div class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(res.cause());</div><div class="line">		&#125;</div><div class="line">		<span class="comment">// insert some test data</span></div><div class="line">		connection.execute(<span class="string">"insert into test values(1, 'Hello')"</span>, insert -&gt; &#123;</div><div class="line">			<span class="comment">// query some data</span></div><div class="line">			connection.query(<span class="string">"select * from test"</span>, rs -&gt; &#123;</div><div class="line">				<span class="keyword">for</span> (JsonArray line : rs.result().getResults()) &#123;</div><div class="line">					System.out.println(line.encode());</div><div class="line">				&#125;</div><div class="line"></div><div class="line">				<span class="comment">// and close the connection</span></div><div class="line">				connection.close(done -&gt; &#123;</div><div class="line">					<span class="keyword">if</span> (done.failed()) &#123;</div><div class="line">						<span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(done.cause());</div><div class="line">					&#125;</div><div class="line">				&#125;);</div><div class="line">			&#125;);</div><div class="line">		&#125;);</div><div class="line">	&#125;);</div><div class="line">&#125;);</div></pre></td></tr></table></figure></p>
 <p>上面代码可以是不是有点恶心呢？尝试改造一下吧。  </p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> JDBCClient client = JDBCClient.createShared(vertx, <span class="keyword">new</span> JsonObject()</span><br><span class="line">.put(<span class="string">"url"</span>, <span class="string">"jdbc:hsqldb:mem:test?shutdown=true"</span>)</span><br><span class="line">.put(<span class="string">"driver_class"</span>, <span class="string">"org.hsqldb.jdbcDriver"</span>)</span><br><span class="line">.put(<span class="string">"max_pool_size"</span>, <span class="number">30</span>));</span><br><span class="line"></span><br><span class="line"><span class="keyword">try</span> (SQLConnection conn = awaitResult(jdbc::getConnection)) &#123;</span><br><span class="line">	awaitResult(h -&gt; conn.execute(<span class="string">"create table test(id int primary key, name varchar(255))"</span>, h));</span><br><span class="line">	awaitResult(h -&gt; conn.execute(<span class="string">"insert into test values(1, 'Hello')"</span>, h));</span><br><span class="line">	ResultSet query = awaitResult(h -&gt; conn.query(<span class="string">"select * from test"</span>, h));</span><br><span class="line">	<span class="keyword">for</span> (JsonArray line : query.result.getResults()) &#123;</span><br><span class="line">		System.out.println(line.encode());</span><br><span class="line">	&#125;</span><br><span class="line">	AsyncResult done = awaitResult(h -&gt; conn.close(h));</span><br><span class="line">	<span class="keyword">if</span> (done.failed()) &#123;</span><br><span class="line">		<span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(done.cause())</span><br><span class="line">	&#125;</span><br><span class="line">&#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">	e.printStackTrace();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">final</span> JDBCClient client = JDBCClient.createShared(vertx, <span class="keyword">new</span> JsonObject()</div><div class="line">.put(<span class="string">"url"</span>, <span class="string">"jdbc:hsqldb:mem:test?shutdown=true"</span>)</div><div class="line">.put(<span class="string">"driver_class"</span>, <span class="string">"org.hsqldb.jdbcDriver"</span>)</div><div class="line">.put(<span class="string">"max_pool_size"</span>, <span class="number">30</span>));</div><div class="line"></div><div class="line"><span class="keyword">try</span> (SQLConnection conn = awaitResult(jdbc::getConnection)) &#123;</div><div class="line">	awaitResult(h -&gt; conn.execute(<span class="string">"create table test(id int primary key, name varchar(255))"</span>, h));</div><div class="line">	awaitResult(h -&gt; conn.execute(<span class="string">"insert into test values(1, 'Hello')"</span>, h));</div><div class="line">	ResultSet query = awaitResult(h -&gt; conn.query(<span class="string">"select * from test"</span>, h));</div><div class="line">	<span class="keyword">for</span> (JsonArray line : query.result.getResults()) &#123;</div><div class="line">		System.out.println(line.encode());</div><div class="line">	&#125;</div><div class="line">	AsyncResult done = awaitResult(h -&gt; conn.close(h));</div><div class="line">	<span class="keyword">if</span> (done.failed()) &#123;</div><div class="line">		<span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(done.cause())</div><div class="line">	&#125;</div><div class="line">&#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line">	e.printStackTrace();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>除了一个try catch，其他都没有嵌套，整体逻辑的可读性非常高，完全是线性的。</p>
-<h5 id="如何将逻辑放倒Fiber里"><a href="#如何将逻辑放倒Fiber里" class="headerlink" title="如何将逻辑放倒Fiber里"></a>如何将逻辑放倒Fiber里</h5><p>你也许会发现我们似乎一直都没有用到 <strong>fiberHandler</strong> 这个静态方法，上面虽然写了定义，可能大家还是不能够理解，这里结合场景也许能更好理解。<br>我们尝试实现一个操作很耗时的逻辑然后包到fiber里，避免 <strong>EventLoop</strong> 被阻塞。这里你也许会很好奇，既然 Fiber 这么廉价开启10万8万的无所谓啊，恩，这里再提一下quasar的重点部分: <strong>fiber可以很廉价的被创造出来，但是他本质上还是跑在一个线程上面，如果其中一个fiber执行了非常耗时的操作，则后面的fiber会一直等待，从而造成整个线程阻塞。</strong> 也就是说一个fiber不能执行非常耗时的操作，比如计算100万以内的素数之和，对于这种操作，我们可以通过直接将逻辑放到vert.x的worker线程里单独去跑，然后通过fiber包装一下就可以了。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">AsyncResult&lt;Long&gt; result = awaitResult(fiberHandler(h -&gt; vertx.executeBlocking((Handler&lt;Future&lt;Long&gt;&gt;) event -&gt; &#123;</span><br><span class="line">	<span class="comment">//求百万以内素数之和,这里的逻辑会在vert.x的worker线程里跑。随便耗时多久,都不会阻塞EventLoop</span></span><br><span class="line">	<span class="keyword">long</span> sum = sumOfPrime(<span class="number">1</span>, <span class="number">000</span>, <span class="number">000</span>);</span><br><span class="line">	event.complete(sum);</span><br><span class="line">&#125;, h)));</span><br><span class="line"><span class="comment">//打印结果</span></span><br><span class="line">System.out.println(result.result());</span><br><span class="line">```  </span><br><span class="line"></span><br><span class="line">这里你会注意到 awaitReslt 里用了 *fiberHandler* ，因为executeBlocking里的 *handler* 逻辑本身并没有跑在fiber体系下，所以会导致无效，而fiberHandler的作用就是将一段vert.x的handler包到 fiber 里。使之后续的await可以将其结果返回，这里使用awaitResult返回结果。  </span><br><span class="line">我们再深入一点看看 fiberHandler 方法里到底干了什么。  </span><br><span class="line">```java</span><br><span class="line"><span class="meta">@Suspendable</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">Handler&lt;T&gt; <span class="title">fiberHandler</span><span class="params">(Handler&lt;T&gt; handler)</span> </span>&#123;</span><br><span class="line">  FiberScheduler scheduler = getContextScheduler();</span><br><span class="line">  <span class="keyword">return</span> p -&gt; <span class="keyword">new</span> Fiber&lt;Void&gt;(scheduler, () -&gt; handler.handle(p)).start();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h5 id="如何将逻辑放倒Fiber里"><a href="#如何将逻辑放倒Fiber里" class="headerlink" title="如何将逻辑放倒Fiber里"></a>如何将逻辑放倒Fiber里</h5><p>你也许会发现我们似乎一直都没有用到 <strong>fiberHandler</strong> 这个静态方法，上面虽然写了定义，可能大家还是不能够理解，这里结合场景也许能更好理解。<br>我们尝试实现一个操作很耗时的逻辑然后包到fiber里，避免 <strong>EventLoop</strong> 被阻塞。这里你也许会很好奇，既然 Fiber 这么廉价开启10万8万的无所谓啊，恩，这里再提一下quasar的重点部分: <strong>fiber可以很廉价的被创造出来，但是他本质上还是跑在一个线程上面，如果其中一个fiber执行了非常耗时的操作，则后面的fiber会一直等待，从而造成整个线程阻塞。</strong> 也就是说一个fiber不能执行非常耗时的操作，比如计算100万以内的素数之和，对于这种操作，我们可以通过直接将逻辑放到vert.x的worker线程里单独去跑，然后通过fiber包装一下就可以了。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">AsyncResult&lt;Long&gt; result = awaitResult(fiberHandler(h -&gt; vertx.executeBlocking((Handler&lt;Future&lt;Long&gt;&gt;) event -&gt; &#123;</div><div class="line">	<span class="comment">//求百万以内素数之和,这里的逻辑会在vert.x的worker线程里跑。随便耗时多久,都不会阻塞EventLoop</span></div><div class="line">	<span class="keyword">long</span> sum = sumOfPrime(<span class="number">1</span>, <span class="number">000</span>, <span class="number">000</span>);</div><div class="line">	event.complete(sum);</div><div class="line">&#125;, h)));</div><div class="line"><span class="comment">//打印结果</span></div><div class="line">System.out.println(result.result());</div><div class="line">```  </div><div class="line"></div><div class="line">这里你会注意到 awaitReslt 里用了 *fiberHandler* ，因为executeBlocking里的 *handler* 逻辑本身并没有跑在fiber体系下，所以会导致无效，而fiberHandler的作用就是将一段vert.x的handler包到 fiber 里。使之后续的await可以将其结果返回，这里使用awaitResult返回结果。  </div><div class="line">我们再深入一点看看 fiberHandler 方法里到底干了什么。  </div><div class="line">```java</div><div class="line"><span class="meta">@Suspendable</span></div><div class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;T&gt; <span class="function">Handler&lt;T&gt; <span class="title">fiberHandler</span><span class="params">(Handler&lt;T&gt; handler)</span> </span>&#123;</div><div class="line">  FiberScheduler scheduler = getContextScheduler();</div><div class="line">  <span class="keyword">return</span> p -&gt; <span class="keyword">new</span> Fiber&lt;Void&gt;(scheduler, () -&gt; handler.handle(p)).start();</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p>这里获取Fiber的调度器，然后直接new了一个 <strong>Fiber</strong> ，避免了我们自己对逻辑做Fiber包装。是不是很简单呢。</p>
 <h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>相比较传统的回调Handler，vertx-sync的包装十分优雅，基本可以恢复到同步方法调用级别，很好的减轻了异步回调带来的心智负担。<br>但是这个毕竟不是JVM级别的实现，所以或多或少还是有点门槛的，比如部署的时候，需要通过设置JVM参数来修改部分字节码，同时还要注意一些<br>需要挂起的方法上面加注释或者强行让其抛出可中断异常。个人建议在一些不重要的工具级项目里使用，非常重要的项目不推荐使用，当然了如果你觉得你的业务只需要依赖vert.x那么强烈你推荐你使用，只要记得打开 <strong>BlockingChecker</strong> 就好，可以即时的发现潜在的阻塞逻辑。<br>另外7.24号上海会有一场关于Vert.x的<a href="http://www.huodongxing.com/event/9342097827100?utm_source=%E6%90%9C%E7%B4%A2%E9%A1%B5&amp;utm_medium=&amp;utm_campaign=searchpage" target="_blank" rel="external">聚会</a>，有兴趣的同学我们可以当面聊聊。</p>
-</div><a data-url="http://www.streamis.me/2016/07/19/java-next-generation-1-1/" data-id="cj8v0fz7c000jiv45mb8ml6ie" class="article-share-link">Aktie</a><div class="tags"></div><div class="post-nav"><a href="/2017/06/01/raft/" class="pre">raft理解</a><a href="/2016/05/04/java-next-generation-1/" class="next">次时代Java编程(一) Java里的协程</a></div></div></div></div><div class="pure-u-1-4"><div id="sidebar"><div class="widget"><form action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank" class="search-form"><input type="text" name="q" maxlength="20" placeholder="Search"/><input type="hidden" name="sitesearch" value="http://www.streamis.me"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> Kategorien</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Emacs/">Emacs</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Storm/">Storm</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Vert-x/">Vert.x</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Vert-x/Asynchronize-programming/">Asynchronize programming</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Vert-x/micro-service/">micro-service</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/vert-x源码分析/">vert.x源码分析</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> Tags</i></div><div class="tagcloud"><a href="/tags/vert-x/" style="font-size: 15px;">vert.x</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> Letzte</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/09/29/java-next-generation-2/">次时代Java编程(二) vertx-lang-kotlin-coroutines介绍</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/06/01/raft/">raft理解</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/19/java-next-generation-1-1/">次时代Java编程(一):续 vertx-sync实践</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/04/java-next-generation-1/">次时代Java编程(一) Java里的协程</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/05/26/vertx-rpckuang-jia/">Vertx-rpc框架</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/10/06/vert-dot-x3-update/">Vert.x3 Update</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/05/06/vert-dot-xyu-lao-xiang-mu-jie-he/">Vert.x与老项目结合</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/05/04/vert-dot-xli-yi-bu-chu-li-di-san-fang-fu-wu/">Vert.x里异步处理第三方服务</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/05/02/os-x-xia-she-zhi-emacs-shellde-ls-color/">OS X 下设置Emacs Shell-mode 输出颜色</a></li><li class="post-list-item"><a class="post-list-link" href="/2013/11/21/vert-xnei-bu-xian-cheng-fen-xi/">vert-x内部线程分析</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> Blogroll</i></div><ul></ul><a href="http://www.example1.com/" title="site-name1" target="_blank">site-name1</a><ul></ul><a href="http://www.example2.com/" title="site-name2" target="_blank">site-name2</a><ul></ul><a href="http://www.example3.com/" title="site-name3" target="_blank">site-name3</a></div></div></div></div><div id="footer">© <a href="/." rel="nofollow">Writing for Thingking.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/js/jquery.min.js?v=0.0.0"></script><script type="text/javascript" src="/js/totop.js?v=0.0.0"></script><script type="text/javascript" src="/js/fancybox.pack.js?v=0.0.0"></script><script type="text/javascript" src="/js/jquery.fancybox.js?v=0.0.0"></script><link rel="stylesheet" type="text/css" href="/css/jquery.fancybox.css?v=0.0.0"><script type="text/javascript" src="/js/share.js?v=0.0.0"></script><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>
+
+            </div>
+          
+
+    
+      <footer class="post-footer">
+		
+
+        
+        
+  <nav class="post-nav">
+    
+      <a class="prev" href="/2017/06/01/raft/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">raft理解</span>
+        <span class="prev-text nav-mobile">Prev</span>
+      </a>
+    
+    
+      <a class="next" href="/2016/05/04/java-next-generation-1/">
+        <span class="next-text nav-default">次时代Java编程(一) Java里的协程</span>
+        <span class="prev-text nav-mobile">Next</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+        
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+      </footer>
+    
+  </article>
+
+    </div>
+
+      </div>
+
+      <footer id="colophon"><span class="copyright-year">
+    
+        &copy;
+    
+        2014 -
+    
+    2017
+    <span class="footer-author">Stream Liu.</span>
+    <span class="power-by">
+        Powered by <a class="hexo-link" href="https://hexo.io/">Hexo</a> and <a class="theme-link" href="https://github.com/frostfan/hexo-theme-polarbear">Polar Bear</a>
+    </span>
+</span>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+    
+
+
+    
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+
+    <script type="text/javascript" src="/js/src/theme.js?v=1.1"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=1.1"></script>
+
+  </body>
+</html>

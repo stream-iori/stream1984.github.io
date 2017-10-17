@@ -1,4 +1,133 @@
-<!DOCTYPE html><html lang="zh"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description"><title>Vert.x模块深入 | Writing for Thingking</title><link rel="stylesheet" type="text/css" href="/css/normalize.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="/css/pure-min.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="/css/grids-responsive-min.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.5.0/css/font-awesome.min.css"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">Vert.x模块深入</h1><a id="logo" href="/.">Writing for Thingking</a><p class="description"></p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> Start</i></a><a href="/archives/"><i class="fa fa-archive"> Archiv</i></a><a href="/about/"><i class="fa fa-user"> Über</i></a><a href="/atom.xml"><i class="fa fa-rss"> RSS</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">Vert.x模块深入</h1><div class="post-meta">Oct 24, 2013<span> | </span><span class="category"><a href="/categories/Vert-x/">Vert.x</a><a href="/categories/Vert-x/Asynchronize-programming/">Asynchronize programming</a></span><script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><span id="busuanzi_container_page_pv"> | <span id="busuanzi_value_page_pv"></span><span> Hits</span></span></div><div class="post-content"><p>最近小忙了一点,一直拖着没有总结Vert.x模块其他内容,今天在下班前应该可以写完模块这一部分的总结。</p>
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1,minimum-scale=1,maximum-scale=1">
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+  <meta name="description" content="Vert.x模块深入"/>
+
+
+
+
+
+
+
+
+  <link rel="alternate" href="/default" title="Writing for Thingking">
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=1.1" />
+
+
+
+<link rel="canonical" href="http://www.streamis.me/2013/10/24/vert-dot-xmo-kuai-shen-ru/"/>
+
+
+<meta name="description" content="最近小忙了一点,一直拖着没有总结Vert.x模块其他内容,今天在下班前应该可以写完模块这一部分的总结。 模块包含有时候你会发现几个模块之间用了共同的Jar文件,或者资源文件.比如我们常用的Apache Commons Lang等.这个时候多个模块,会在JVM里加载多份,导致很多重复的引用,而且会有可能导致JVM里的方法区爆满.这个时候推荐将这些资源文件打包到一个模块里.这种模块称为资源模块.然后在">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Vert.x模块深入">
+<meta property="og:url" content="http://www.streamis.me/2013/10/24/vert-dot-xmo-kuai-shen-ru/index.html">
+<meta property="og:site_name" content="Writing for Thingking">
+<meta property="og:description" content="最近小忙了一点,一直拖着没有总结Vert.x模块其他内容,今天在下班前应该可以写完模块这一部分的总结。 模块包含有时候你会发现几个模块之间用了共同的Jar文件,或者资源文件.比如我们常用的Apache Commons Lang等.这个时候多个模块,会在JVM里加载多份,导致很多重复的引用,而且会有可能导致JVM里的方法区爆满.这个时候推荐将这些资源文件打包到一个模块里.这种模块称为资源模块.然后在">
+<meta property="og:locale" content="zh">
+<meta property="og:updated_time" content="2014-06-17T00:33:00.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Vert.x模块深入">
+<meta name="twitter:description" content="最近小忙了一点,一直拖着没有总结Vert.x模块其他内容,今天在下班前应该可以写完模块这一部分的总结。 模块包含有时候你会发现几个模块之间用了共同的Jar文件,或者资源文件.比如我们常用的Apache Commons Lang等.这个时候多个模块,会在JVM里加载多份,导致很多重复的引用,而且会有可能导致JVM里的方法区爆满.这个时候推荐将这些资源文件打包到一个模块里.这种模块称为资源模块.然后在">
+
+
+<link rel="stylesheet" type="text/css" href="/css/style.css?v=1.1" />
+<link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet'>
+
+
+
+
+
+<script type="text/javascript">
+  var themeConfig = {
+    fancybox: {
+      enable: false
+    },
+  };
+</script>
+
+
+
+
+  
+
+
+
+    <title> Vert.x模块深入 - Writing for Thingking </title>
+  </head>
+
+  <body>
+    <div id="page">
+      <header id="masthead"><div class="site-header-inner">
+    <h1 class="site-title">
+        <a href="/." class="logo">Writing for Thingking</a>
+    </h1>
+
+    <nav id="nav-top">
+        
+            <ul id="menu-top" class="nav-top-items">
+                
+                    <li class="menu-item">
+                        <a href="/archives">
+                            
+                            
+                                Archives
+                            
+                        </a>
+                    </li>
+                
+                    <li class="menu-item">
+                        <a href="/about">
+                            
+                            
+                                About
+                            
+                        </a>
+                    </li>
+                
+            </ul>
+        
+  </nav>
+</div>
+
+      </header>
+      <div id="content">
+        
+    <div id="primary">
+        
+  <article class="post">
+    <header class="post-header">
+      <h1 class="post-title">
+        
+          Vert.x模块深入
+        
+      </h1>
+
+      <time class="post-time">
+          Oct 24 2013
+      </time>
+    </header>
+
+
+
+    
+            <div class="post-content">
+            <p>最近小忙了一点,一直拖着没有总结Vert.x模块其他内容,今天在下班前应该可以写完模块这一部分的总结。</p>
 <h2 id="模块包含"><a href="#模块包含" class="headerlink" title="模块包含"></a>模块包含</h2><p>有时候你会发现几个模块之间用了共同的Jar文件,或者资源文件.比如我们常用的Apache Commons Lang等.这个时候多个模块,会在JVM里加载多份,导致很多重复的引用,而且会有可能导致JVM里的方法区爆满.这个时候推荐将这些资源文件打包到一个模块里.这种模块称为资源模块.然后在其他模块里使用<code>include</code>去包含他.我们举个栗子.<br>我们有一个<code>commons-lang3.jar</code>,这个jar包希望用在两个模块下面,比如<code>com.xx.module1-v1.0</code>和<code>com.xx.module2-v1.0</code>.为了包含这个<code>commons-lang3.jar</code>我们需要创建一个模块.比如<code>com.xx.share-v1.0</code>,在这个模块的目录下建立一个<code>lib</code>文件夹,然后把<code>commons-lang3.jar</code>放到这个目录里.看起来应该是</p>
 <pre><code>|--com.xx.share-v1.0
 |----lib
@@ -45,4 +174,82 @@ Version: 1.2-beta
 <li>vertx uninstall <module_name> 与上面的命令相反</module_name></li>
 </ul>
 <p>关于Vert.x模块方面的东西,暂时先讲这么多.后期我会介绍几个Vert.x社区里特别流行的模块.</p>
-</div><a data-url="http://www.streamis.me/2013/10/24/vert-dot-xmo-kuai-shen-ru/" data-id="cj8v0fz6v0004iv45emsta1t0" class="article-share-link">Aktie</a><div class="tags"></div><div class="post-nav"><a href="/2013/11/11/rang-stormfei-qi-lai/" class="pre">让Storm飞起来</a><a href="/2013/10/03/vert-dot-xmo-kuai-de-gai-nian/" class="next">Vert.x模块的基本概念</a></div></div></div></div><div class="pure-u-1-4"><div id="sidebar"><div class="widget"><form action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank" class="search-form"><input type="text" name="q" maxlength="20" placeholder="Search"/><input type="hidden" name="sitesearch" value="http://www.streamis.me"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> Kategorien</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Emacs/">Emacs</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Storm/">Storm</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Vert-x/">Vert.x</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/Vert-x/Asynchronize-programming/">Asynchronize programming</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Vert-x/micro-service/">micro-service</a></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/vert-x源码分析/">vert.x源码分析</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> Tags</i></div><div class="tagcloud"><a href="/tags/vert-x/" style="font-size: 15px;">vert.x</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> Letzte</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2017/09/29/java-next-generation-2/">次时代Java编程(二) vertx-lang-kotlin-coroutines介绍</a></li><li class="post-list-item"><a class="post-list-link" href="/2017/06/01/raft/">raft理解</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/07/19/java-next-generation-1-1/">次时代Java编程(一):续 vertx-sync实践</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/05/04/java-next-generation-1/">次时代Java编程(一) Java里的协程</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/05/26/vertx-rpckuang-jia/">Vertx-rpc框架</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/10/06/vert-dot-x3-update/">Vert.x3 Update</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/05/06/vert-dot-xyu-lao-xiang-mu-jie-he/">Vert.x与老项目结合</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/05/04/vert-dot-xli-yi-bu-chu-li-di-san-fang-fu-wu/">Vert.x里异步处理第三方服务</a></li><li class="post-list-item"><a class="post-list-link" href="/2014/05/02/os-x-xia-she-zhi-emacs-shellde-ls-color/">OS X 下设置Emacs Shell-mode 输出颜色</a></li><li class="post-list-item"><a class="post-list-link" href="/2013/11/21/vert-xnei-bu-xian-cheng-fen-xi/">vert-x内部线程分析</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> Blogroll</i></div><ul></ul><a href="http://www.example1.com/" title="site-name1" target="_blank">site-name1</a><ul></ul><a href="http://www.example2.com/" title="site-name2" target="_blank">site-name2</a><ul></ul><a href="http://www.example3.com/" title="site-name3" target="_blank">site-name3</a></div></div></div></div><div id="footer">© <a href="/." rel="nofollow">Writing for Thingking.</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/js/jquery.min.js?v=0.0.0"></script><script type="text/javascript" src="/js/totop.js?v=0.0.0"></script><script type="text/javascript" src="/js/fancybox.pack.js?v=0.0.0"></script><script type="text/javascript" src="/js/jquery.fancybox.js?v=0.0.0"></script><link rel="stylesheet" type="text/css" href="/css/jquery.fancybox.css?v=0.0.0"><script type="text/javascript" src="/js/share.js?v=0.0.0"></script><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>
+
+            </div>
+          
+
+    
+      <footer class="post-footer">
+		
+
+        
+        
+  <nav class="post-nav">
+    
+      <a class="prev" href="/2013/11/11/rang-stormfei-qi-lai/">
+        <i class="iconfont icon-left"></i>
+        <span class="prev-text nav-default">让Storm飞起来</span>
+        <span class="prev-text nav-mobile">Prev</span>
+      </a>
+    
+    
+      <a class="next" href="/2013/10/03/vert-dot-xmo-kuai-de-gai-nian/">
+        <span class="next-text nav-default">Vert.x模块的基本概念</span>
+        <span class="prev-text nav-mobile">Next</span>
+        <i class="iconfont icon-right"></i>
+      </a>
+    
+  </nav>
+
+        
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+      </footer>
+    
+  </article>
+
+    </div>
+
+      </div>
+
+      <footer id="colophon"><span class="copyright-year">
+    
+        &copy;
+    
+        2014 -
+    
+    2017
+    <span class="footer-author">Stream Liu.</span>
+    <span class="power-by">
+        Powered by <a class="hexo-link" href="https://hexo.io/">Hexo</a> and <a class="theme-link" href="https://github.com/frostfan/hexo-theme-polarbear">Polar Bear</a>
+    </span>
+</span>
+
+      </footer>
+
+      <div class="back-to-top" id="back-to-top">
+        <i class="iconfont icon-up"></i>
+      </div>
+    </div>
+    
+
+
+    
+
+
+
+
+  
+    <script type="text/javascript" src="/lib/jquery/jquery-3.1.1.min.js"></script>
+  
+
+  
+
+    <script type="text/javascript" src="/js/src/theme.js?v=1.1"></script>
+<script type="text/javascript" src="/js/src/bootstrap.js?v=1.1"></script>
+
+  </body>
+</html>
